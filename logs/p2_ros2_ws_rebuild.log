@@ -1,0 +1,34 @@
+Starting >>> ros2_livox_simulation
+Starting >>> relocalization
+--- stderr: ros2_livox_simulation
+In this package, headers install destination is set to `include` by ament_auto_package. It is recommended to install `include/ros2_livox_simulation` instead and will be the default behavior of ament_auto_package from ROS 2 Kilted Kaiju. On distributions before Kilted, ament_auto_package behaves the same way when you use USE_SCOPED_HEADER_INSTALL_DIR option.
+In file included from /home/zx/ITEM/SCU27RC_Nav/Nav/ros2_ws/src/livox_laser_simulation_ros2/include/ros2_livox/livox_points_plugin.h:14,
+                 from /home/zx/ITEM/SCU27RC_Nav/Nav/ros2_ws/src/livox_laser_simulation_ros2/src/livox_points_plugin.cpp:12:
+/opt/ros/humble/include/sensor_msgs/sensor_msgs/point_cloud_conversion.hpp:47:6: warning: #warning POINT_CLOUD_DEPRECATION_MESSAGE [-Wcpp]
+   47 | #    warning POINT_CLOUD_DEPRECATION_MESSAGE
+      |      ^~~~~~~
+/home/zx/ITEM/SCU27RC_Nav/Nav/ros2_ws/src/livox_laser_simulation_ros2/src/livox_points_plugin.cpp: In member function ‘virtual void gazebo::LivoxPointsPlugin::OnNewLaserScans()’:
+/home/zx/ITEM/SCU27RC_Nav/Nav/ros2_ws/src/livox_laser_simulation_ros2/src/livox_points_plugin.cpp:215:22: warning: ‘bool sensor_msgs::convertPointCloudToPointCloud2(const PointCloud&, sensor_msgs::msg::PointCloud2&)’ is deprecated: PointCloud is deprecated as of Foxy in favor of sensor_msgs/PointCloud2. [-Wdeprecated-declarations]
+  215 |         sensor_msgs::convertPointCloudToPointCloud2(cloud, cloud2);
+      |                      ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+In file included from /home/zx/ITEM/SCU27RC_Nav/Nav/ros2_ws/src/livox_laser_simulation_ros2/include/ros2_livox/livox_points_plugin.h:14,
+                 from /home/zx/ITEM/SCU27RC_Nav/Nav/ros2_ws/src/livox_laser_simulation_ros2/src/livox_points_plugin.cpp:12:
+/opt/ros/humble/include/sensor_msgs/sensor_msgs/point_cloud_conversion.hpp:81:20: note: declared here
+   81 | static inline bool convertPointCloudToPointCloud2(
+      |                    ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/zx/ITEM/SCU27RC_Nav/Nav/ros2_ws/src/livox_laser_simulation_ros2/src/livox_points_plugin.cpp:215:52: warning: ‘bool sensor_msgs::convertPointCloudToPointCloud2(const PointCloud&, sensor_msgs::msg::PointCloud2&)’ is deprecated: PointCloud is deprecated as of Foxy in favor of sensor_msgs/PointCloud2. [-Wdeprecated-declarations]
+  215 |         sensor_msgs::convertPointCloudToPointCloud2(cloud, cloud2);
+      |         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~
+In file included from /home/zx/ITEM/SCU27RC_Nav/Nav/ros2_ws/src/livox_laser_simulation_ros2/include/ros2_livox/livox_points_plugin.h:14,
+                 from /home/zx/ITEM/SCU27RC_Nav/Nav/ros2_ws/src/livox_laser_simulation_ros2/src/livox_points_plugin.cpp:12:
+/opt/ros/humble/include/sensor_msgs/sensor_msgs/point_cloud_conversion.hpp:81:20: note: declared here
+   81 | static inline bool convertPointCloudToPointCloud2(
+      |                    ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+---
+Finished <<< ros2_livox_simulation [20.6s]
+Starting >>> rc_field_nav
+Finished <<< rc_field_nav [0.62s]
+Finished <<< relocalization [37.8s]
+
+Summary: 3 packages finished [38.0s]
+  1 package had stderr output: ros2_livox_simulation

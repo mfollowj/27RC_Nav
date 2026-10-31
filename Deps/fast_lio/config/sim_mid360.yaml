@@ -1,0 +1,66 @@
+/**:
+    ros__parameters:
+        # =====================================================================
+        # FAST-LIO2 仿真配置（Gazebo / livox_laser_simulation_RO2）
+        #
+        # 与上游 mid360.yaml 的差异及原因：
+        #   1. extrinsic_T 改为仿真中真实存在的几何外参。
+        #      仿真 URDF: base_link -> imu_link = (0, 0, 0.125)
+        #                 base_link -> livox_frame = (0, 0, 0.175)
+        #      故 LiDAR 在 IMU 坐标系下的位置 = (0, 0, 0.05)。
+        #      上游默认值 [-0.011, -0.02329, 0.04412] 是真实 Mid-360 的标定值，
+        #      用在仿真里会引入固定偏差。
+        #   2. extrinsic_est_en 关闭：仿真外参精确已知，无需在线估计，
+        #      关闭后更稳定、收敛更快。
+        #   3. pcd_save_en 关闭：上游默认 true + interval=-1 会把所有帧累积进
+        #      内存并在退出时写成单个 pcd，长时间仿真会耗尽内存。
+        #   4. 话题名沿用 /livox/lidar 与 /livox/imu，与仿真发布的话题一致
+        #      （仿真发布 livox_ros_driver2/CustomMsg，对应 lidar_type: 1）。
+        # =====================================================================
+
+        feature_extract_enable: false
+        point_filter_num: 3
+        max_iteration: 3
+        filter_size_surf: 0.5
+        filter_size_map: 0.5
+        cube_side_length: 1000.0
+        runtime_pos_log_enable: false
+        map_file_path: "./test.pcd"
+
+        common:
+            lid_topic:  "/livox/lidar"
+            imu_topic:  "/livox/imu"
+            time_sync_en: false
+            time_offset_lidar_to_imu: 0.0
+
+        preprocess:
+            lidar_type: 1                # 1 = Livox serials (CustomMsg)
+            scan_line: 4
+            blind: 0.5
+            timestamp_unit: 3
+            scan_rate: 10
+
+        mapping:
+            acc_cov: 0.1
+            gyr_cov: 0.1
+            b_acc_cov: 0.0001
+            b_gyr_cov: 0.0001
+            fov_degree: 360.0
+            det_range: 100.0
+            extrinsic_est_en: false      # 仿真外参精确，关闭在线估计
+            extrinsic_T: [ 0.0, 0.0, 0.05 ]
+            extrinsic_R: [ 1., 0., 0.,
+                           0., 1., 0.,
+                           0., 0., 1. ]
+
+        publish:
+            path_en: true
+            effect_map_en: false
+            map_en: true
+            scan_publish_en: true
+            dense_publish_en: false
+            scan_bodyframe_pub_en: true
+
+        pcd_save:
+            pcd_save_en: false           # 见文件头说明
+            interval: -1

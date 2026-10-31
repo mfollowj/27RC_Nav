@@ -1,0 +1,6 @@
+[INFO] [1793366396.808084206] [reloc_bridge]: reloc_bridge: /icp_result(map<-livox) -> /relocalization_result(map<-base)；外参 E=-0.011,-0.023,0.044 rpy=0.0,0.0,0.0；稳定 3 帧 / 0.25 m / 8.0 deg；与已生效位姿差 > 0.50 m 或 10.0 deg 才重建
+[INFO] [1793366396.808418343] [reloc_bridge]: 未定位前先发 identity map->odom（此时 map=odom，仅用于让 RViz 有 map 帧）；第一次定位成功后会切换成真实值。
+[INFO] [1793366397.294419664] [reloc_bridge]: icp=0 applied=0(first 0/recover 0) residual=0.00 m / 0.0 deg (max 0.00 m / 0.0 deg) lio_norm=NA
+[INFO] [1793366399.294556535] [reloc_bridge]: icp=0 applied=0(first 0/recover 0) residual=0.00 m / 0.0 deg (max 0.00 m / 0.0 deg) lio_norm=NA
+[INFO] [1793366401.794417070] [reloc_bridge]: icp=0 applied=0(first 0/recover 0) residual=0.00 m / 0.0 deg (max 0.00 m / 0.0 deg) lio_norm=NA
+[reloc_bridge] ===== 导航结束：重定位 0 次（首次定位 0 / 漂移修正 0），收到 0 帧重定位结果，最大残差 0.00 m / 0.0 deg，时长 6 s =====

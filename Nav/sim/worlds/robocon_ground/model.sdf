@@ -1,0 +1,851 @@
+<?xml version="1.0"?>
+<!--
+  ROBOCON「女娲补天」场地模型（Gazebo Classic）
+
+  ============================ 本次修改说明 ============================
+  原文件只有 10 个碰撞体、且完全没有写摩擦力/接触参数，导致：
+    1) 碰撞全靠 SDF 默认值，摩擦不可控（默认 mu=mu2=1，各向同性）；
+    2) L1(6x6) / L2(3x3) 只是 "悬空薄板"(0.02 厚)，没有侧壁 —— 车轮机器人
+       会从高台底下穿过去，也永远上不去；
+    3) 南北两侧的坡道(1 条/侧)与台阶(4 级/侧) 完全没有碰撞体，车直接穿模；
+    4) 五色石基座位置错误：原文件在场地正中心放了一根 r=0.135 高 0.5m 的柱子，
+       而视觉网格里地面基座在 (4.15, 0)、中央基座在 (0,0) 且 z=0.9~1.7；
+    5) 场地外没有任何地面，车开出 11x11 就掉虚空；
+    6) 围栏/中央隔板只有 80mm 高，2D/3D 激光雷达的高度滤波切片看不到它们，
+       建出来的地图边界是 "开口" 的，Nav2 可能规划穿栏路径。
+
+  本次修补（保留原有 link 名称，便于外部引用）：
+    * 每个 collision 都显式写出 <surface> 摩擦与接触参数；
+    * collision_l1 / collision_l2 改为实体盒（与视觉一致，MuJoCo 侧同样处理）；
+    * 新增坡道/台阶/高台小障碍的精确网格碰撞（复用 MuJoCo 拆分网格，
+      见 meshes/collision/*.obj，顶点坐标与视觉网格逐点一致）；
+    * 修正两个基座的位置与尺寸；
+    * 新增 4 面 0.6m 高的"导航边墙"(collision_nav_wall_*) 与 1 面中央隔板
+      加强墙：纯碰撞、无视觉（视觉仍是真实 80mm 围栏），只为让激光雷达
+      能看见边界，从而建出闭合地图、代价地图能正确阻挡围栏；
+    * 场地外地面在 world 文件里补（见 robocon_track.world 的 ground_plane）。
+  ====================================================================
+-->
+<sdf version="1.6">
+  <model name="robocon_ground">
+    <static>true</static>
+
+    <!-- ============================================================ -->
+    <!-- 视觉部分：引用 DAE 模型，显示所有颜色和形状（未改动）        -->
+    <!-- ============================================================ -->
+    <link name="visual_link">
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://robocon_ground/meshes/Untitled.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+
+    <!-- ============================================================ -->
+    <!-- 碰撞体部分                                                    -->
+    <!-- SDF 没有 "碰撞默认值" 机制，因此每个 collision 都显式声明。      -->
+    <!-- 地面/坡道/台阶/高台顶面用完整参数（摩擦+接触+弹性），           -->
+    <!-- 竖直墙体类只声明摩擦即可。                                     -->
+    <!-- ============================================================ -->
+
+    <!-- ========== 1. 红方半场（地面）========== -->
+    <!-- 规则：11m x 5.5m，红方在 y>0，碰撞体厚 0.02m -->
+    <link name="collision_ground_red">
+      <collision name="collision">
+        <geometry>
+          <box>
+            <size>11 5.5 0.02</size>
+          </box>
+        </geometry>
+        <pose>0 2.75 -0.01 0 0 0</pose>
+        <surface>
+          <friction>
+            <ode>
+              <mu>1.0</mu>
+              <mu2>1.0</mu2>
+            </ode>
+          </friction>
+          <contact>
+            <ode>
+              <kp>1e12</kp>
+              <kd>1.0</kd>
+              <max_vel>0.01</max_vel>
+              <min_depth>0.001</min_depth>
+            </ode>
+          </contact>
+          <bounce>
+            <restitution_coefficient>0.0</restitution_coefficient>
+            <threshold>1e6</threshold>
+          </bounce>
+        </surface>
+      </collision>
+    </link>
+
+    <!-- ========== 2. 蓝方半场（地面）========== -->
+    <link name="collision_ground_blue">
+      <collision name="collision">
+        <geometry>
+          <box>
+            <size>11 5.5 0.02</size>
+          </box>
+        </geometry>
+        <pose>0 -2.75 -0.01 0 0 0</pose>
+        <surface>
+          <friction>
+            <ode>
+              <mu>1.0</mu>
+              <mu2>1.0</mu2>
+            </ode>
+          </friction>
+          <contact>
+            <ode>
+              <kp>1e12</kp>
+              <kd>1.0</kd>
+              <max_vel>0.01</max_vel>
+              <min_depth>0.001</min_depth>
+            </ode>
+          </contact>
+          <bounce>
+            <restitution_coefficient>0.0</restitution_coefficient>
+            <threshold>1e6</threshold>
+          </bounce>
+        </surface>
+      </collision>
+    </link>
+
+    <!-- ========== 3. 中央隔板 ========== -->
+    <!-- 规则：长 11m，厚 50mm，高 80mm -->
+    <link name="collision_center_divider">
+      <collision name="collision">
+        <geometry>
+          <box>
+            <size>11 0.05 0.08</size>
+          </box>
+        </geometry>
+        <pose>0 0 0.04 0 0 0</pose>
+        <surface>
+          <friction>
+            <ode>
+              <mu>1.0</mu>
+              <mu2>1.0</mu2>
+            </ode>
+          </friction>
+        </surface>
+      </collision>
+    </link>
+
+    <!-- ========== 4. 前围栏（Y负方向）========== -->
+    <link name="collision_wall_front">
+      <collision name="collision">
+        <geometry>
+          <box>
+            <size>11 0.05 0.08</size>
+          </box>
+        </geometry>
+        <pose>0 -5.5 0.04 0 0 0</pose>
+        <surface>
+          <friction>
+            <ode>
+              <mu>1.0</mu>
+              <mu2>1.0</mu2>
+            </ode>
+          </friction>
+        </surface>
+      </collision>
+    </link>
+
+    <!-- ========== 5. 后围栏（Y正方向）========== -->
+    <link name="collision_wall_back">
+      <collision name="collision">
+        <geometry>
+          <box>
+            <size>11 0.05 0.08</size>
+          </box>
+        </geometry>
+        <pose>0 5.5 0.04 0 0 0</pose>
+        <surface>
+          <friction>
+            <ode>
+              <mu>1.0</mu>
+              <mu2>1.0</mu2>
+            </ode>
+          </friction>
+        </surface>
+      </collision>
+    </link>
+
+    <!-- ========== 6. 左围栏（X负方向）========== -->
+    <link name="collision_wall_left">
+      <collision name="collision">
+        <geometry>
+          <box>
+            <size>0.05 11 0.08</size>
+          </box>
+        </geometry>
+        <pose>-5.5 0 0.04 0 0 0</pose>
+        <surface>
+          <friction>
+            <ode>
+              <mu>1.0</mu>
+              <mu2>1.0</mu2>
+            </ode>
+          </friction>
+        </surface>
+      </collision>
+    </link>
+
+    <!-- ========== 7. 右围栏（X正方向）========== -->
+    <link name="collision_wall_right">
+      <collision name="collision">
+        <geometry>
+          <box>
+            <size>0.05 11 0.08</size>
+          </box>
+        </geometry>
+        <pose>5.5 0 0.04 0 0 0</pose>
+        <surface>
+          <friction>
+            <ode>
+              <mu>1.0</mu>
+              <mu2>1.0</mu2>
+            </ode>
+          </friction>
+        </surface>
+      </collision>
+    </link>
+
+    <!-- ========== 8. 导航边墙（新增，纯碰撞、无视觉）========== -->
+    <!-- 真实围栏只有 80mm 高，激光雷达做高度切片时看不到，于是 SLAM 地图
+         没有闭合边界、Nav2 可能规划出穿栏路径。这里在同一位置叠加 0.6m 高的
+         不可见碰撞墙：物理上不改变任何真实行为（80mm 围栏本来也过不去），
+         但让雷达看得见。若要去掉这层"辅助墙"，直接注释掉这 5 个 link。 -->
+    <link name="collision_nav_wall_front">
+      <collision name="collision">
+        <geometry>
+          <box>
+            <size>11.2 0.05 0.6</size>
+          </box>
+        </geometry>
+        <pose>0 -5.5 0.3 0 0 0</pose>
+        <surface>
+          <friction>
+            <ode>
+              <mu>1.0</mu>
+              <mu2>1.0</mu2>
+            </ode>
+          </friction>
+        </surface>
+      </collision>
+    </link>
+
+    <link name="collision_nav_wall_back">
+      <collision name="collision">
+        <geometry>
+          <box>
+            <size>11.2 0.05 0.6</size>
+          </box>
+        </geometry>
+        <pose>0 5.5 0.3 0 0 0</pose>
+        <surface>
+          <friction>
+            <ode>
+              <mu>1.0</mu>
+              <mu2>1.0</mu2>
+            </ode>
+          </friction>
+        </surface>
+      </collision>
+    </link>
+
+    <link name="collision_nav_wall_left">
+      <collision name="collision">
+        <geometry>
+          <box>
+            <size>0.05 11.2 0.6</size>
+          </box>
+        </geometry>
+        <pose>-5.5 0 0.3 0 0 0</pose>
+        <surface>
+          <friction>
+            <ode>
+              <mu>1.0</mu>
+              <mu2>1.0</mu2>
+            </ode>
+          </friction>
+        </surface>
+      </collision>
+    </link>
+
+    <link name="collision_nav_wall_right">
+      <collision name="collision">
+        <geometry>
+          <box>
+            <size>0.05 11.2 0.6</size>
+          </box>
+        </geometry>
+        <pose>5.5 0 0.3 0 0 0</pose>
+        <surface>
+          <friction>
+            <ode>
+              <mu>1.0</mu>
+              <mu2>1.0</mu2>
+            </ode>
+          </friction>
+        </surface>
+      </collision>
+    </link>
+
+    <!-- 中央隔板加强墙：80mm 隔板把红蓝半场分开，轮式车本来就过不去 -->
+    <link name="collision_nav_wall_divider">
+      <collision name="collision">
+        <geometry>
+          <box>
+            <size>11.2 0.05 0.6</size>
+          </box>
+        </geometry>
+        <pose>0 0 0.3 0 0 0</pose>
+        <surface>
+          <friction>
+            <ode>
+              <mu>1.0</mu>
+              <mu2>1.0</mu2>
+            </ode>
+          </friction>
+        </surface>
+      </collision>
+    </link>
+
+    <!-- ========== 9. 五色石基座（位置已修正）========== -->
+    <!-- 视觉网格实测：地面基座在 (4.15, 0)，r≈0.14，高 0.5m -->
+    <link name="collision_stone_base">
+      <collision name="collision">
+        <geometry>
+          <cylinder>
+            <radius>0.14</radius>
+            <length>0.5</length>
+          </cylinder>
+        </geometry>
+        <pose>4.15 0 0.25 0 0 0</pose>
+        <surface>
+          <friction>
+            <ode>
+              <mu>1.0</mu>
+              <mu2>1.0</mu2>
+            </ode>
+          </friction>
+        </surface>
+      </collision>
+    </link>
+
+    <!-- ========== 10. 中央基座（新增）========== -->
+    <!-- 视觉网格实测：位于 (0,0)，z 从 0.9 到 1.7（坐在 L2 上），高 0.8m -->
+    <link name="collision_center_base">
+      <collision name="collision">
+        <geometry>
+          <cylinder>
+            <radius>0.14</radius>
+            <length>0.8</length>
+          </cylinder>
+        </geometry>
+        <pose>0 0 1.3 0 0 0</pose>
+        <surface>
+          <friction>
+            <ode>
+              <mu>1.0</mu>
+              <mu2>1.0</mu2>
+            </ode>
+          </friction>
+        </surface>
+      </collision>
+    </link>
+
+    <!-- ========== 11. L1层（改为实体高台）========== -->
+    <!-- 规则：高出地面 600mm，尺寸 6m x 6m。原实现是 0.02m 薄板悬空在 0.61，
+         现改为从地面到顶面的实体，与视觉（顶面 0.602）和 MuJoCo 场景一致。 -->
+    <link name="collision_l1">
+      <collision name="collision">
+        <geometry>
+          <box>
+            <size>6 6 0.602</size>
+          </box>
+        </geometry>
+        <pose>0 0 0.301 0 0 0</pose>
+        <surface>
+          <friction>
+            <ode>
+              <mu>1.0</mu>
+              <mu2>1.0</mu2>
+            </ode>
+          </friction>
+          <contact>
+            <ode>
+              <kp>1e12</kp>
+              <kd>1.0</kd>
+              <max_vel>0.01</max_vel>
+              <min_depth>0.001</min_depth>
+            </ode>
+          </contact>
+          <bounce>
+            <restitution_coefficient>0.0</restitution_coefficient>
+            <threshold>1e6</threshold>
+          </bounce>
+        </surface>
+      </collision>
+    </link>
+
+    <!-- ========== 12. L2层（改为实体高台）========== -->
+    <!-- 规则：高出地面 900mm，尺寸 3m x 3m；视觉侧壁 z=0.602~0.901 -->
+    <link name="collision_l2">
+      <collision name="collision">
+        <geometry>
+          <box>
+            <size>3 3 0.299</size>
+          </box>
+        </geometry>
+        <pose>0 0 0.7515 0 0 0</pose>
+        <surface>
+          <friction>
+            <ode>
+              <mu>1.0</mu>
+              <mu2>1.0</mu2>
+            </ode>
+          </friction>
+          <contact>
+            <ode>
+              <kp>1e12</kp>
+              <kd>1.0</kd>
+              <max_vel>0.01</max_vel>
+              <min_depth>0.001</min_depth>
+            </ode>
+          </contact>
+          <bounce>
+            <restitution_coefficient>0.0</restitution_coefficient>
+            <threshold>1e6</threshold>
+          </bounce>
+        </surface>
+      </collision>
+    </link>
+
+    <!-- ========== 13. 南北两侧坡道（新增，新增原有缺失）========== -->
+    <!-- 来自视觉网格拆分件：红侧 y[3,4]、蓝侧 y[-4,-3]，
+         沿 x 从 2.70(地面) 缓升到 -0.80(高 0.597)，坡度 ≈9.7°。
+         网格顶点坐标即场地坐标，因此不需要 pose。 -->
+    <link name="collision_ramp_red">
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://robocon_ground/meshes/collision/ramp_red.obj</uri>
+          </mesh>
+        </geometry>
+        <surface>
+          <friction>
+            <ode>
+              <mu>1.0</mu>
+              <mu2>1.0</mu2>
+            </ode>
+          </friction>
+          <contact>
+            <ode>
+              <kp>1e12</kp>
+              <kd>1.0</kd>
+              <max_vel>0.01</max_vel>
+              <min_depth>0.001</min_depth>
+            </ode>
+          </contact>
+        </surface>
+      </collision>
+    </link>
+
+    <link name="collision_ramp_blue">
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://robocon_ground/meshes/collision/ramp_blue.obj</uri>
+          </mesh>
+        </geometry>
+        <surface>
+          <friction>
+            <ode>
+              <mu>1.0</mu>
+              <mu2>1.0</mu2>
+            </ode>
+          </friction>
+          <contact>
+            <ode>
+              <kp>1e12</kp>
+              <kd>1.0</kd>
+              <max_vel>0.01</max_vel>
+              <min_depth>0.001</min_depth>
+            </ode>
+          </contact>
+        </surface>
+      </collision>
+    </link>
+
+    <!-- ========== 14. 南北两侧台阶（新增，每侧 4 级，每级 150mm）========== -->
+    <link name="collision_stairs_red_1">
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://robocon_ground/meshes/collision/stairs_red_1.obj</uri>
+          </mesh>
+        </geometry>
+        <surface>
+          <friction>
+            <ode>
+              <mu>1.0</mu>
+              <mu2>1.0</mu2>
+            </ode>
+          </friction>
+          <contact>
+            <ode>
+              <kp>1e12</kp>
+              <kd>1.0</kd>
+              <max_vel>0.01</max_vel>
+              <min_depth>0.001</min_depth>
+            </ode>
+          </contact>
+        </surface>
+      </collision>
+    </link>
+
+    <link name="collision_stairs_red_2">
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://robocon_ground/meshes/collision/stairs_red_2.obj</uri>
+          </mesh>
+        </geometry>
+        <surface>
+          <friction>
+            <ode>
+              <mu>1.0</mu>
+              <mu2>1.0</mu2>
+            </ode>
+          </friction>
+          <contact>
+            <ode>
+              <kp>1e12</kp>
+              <kd>1.0</kd>
+              <max_vel>0.01</max_vel>
+              <min_depth>0.001</min_depth>
+            </ode>
+          </contact>
+        </surface>
+      </collision>
+    </link>
+
+    <link name="collision_stairs_red_3">
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://robocon_ground/meshes/collision/stairs_red_3.obj</uri>
+          </mesh>
+        </geometry>
+        <surface>
+          <friction>
+            <ode>
+              <mu>1.0</mu>
+              <mu2>1.0</mu2>
+            </ode>
+          </friction>
+          <contact>
+            <ode>
+              <kp>1e12</kp>
+              <kd>1.0</kd>
+              <max_vel>0.01</max_vel>
+              <min_depth>0.001</min_depth>
+            </ode>
+          </contact>
+        </surface>
+      </collision>
+    </link>
+
+    <link name="collision_stairs_red_4">
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://robocon_ground/meshes/collision/stairs_red_4.obj</uri>
+          </mesh>
+        </geometry>
+        <surface>
+          <friction>
+            <ode>
+              <mu>1.0</mu>
+              <mu2>1.0</mu2>
+            </ode>
+          </friction>
+          <contact>
+            <ode>
+              <kp>1e12</kp>
+              <kd>1.0</kd>
+              <max_vel>0.01</max_vel>
+              <min_depth>0.001</min_depth>
+            </ode>
+          </contact>
+        </surface>
+      </collision>
+    </link>
+
+    <link name="collision_stairs_blue_1">
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://robocon_ground/meshes/collision/stairs_blue_1.obj</uri>
+          </mesh>
+        </geometry>
+        <surface>
+          <friction>
+            <ode>
+              <mu>1.0</mu>
+              <mu2>1.0</mu2>
+            </ode>
+          </friction>
+          <contact>
+            <ode>
+              <kp>1e12</kp>
+              <kd>1.0</kd>
+              <max_vel>0.01</max_vel>
+              <min_depth>0.001</min_depth>
+            </ode>
+          </contact>
+        </surface>
+      </collision>
+    </link>
+
+    <link name="collision_stairs_blue_2">
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://robocon_ground/meshes/collision/stairs_blue_2.obj</uri>
+          </mesh>
+        </geometry>
+        <surface>
+          <friction>
+            <ode>
+              <mu>1.0</mu>
+              <mu2>1.0</mu2>
+            </ode>
+          </friction>
+          <contact>
+            <ode>
+              <kp>1e12</kp>
+              <kd>1.0</kd>
+              <max_vel>0.01</max_vel>
+              <min_depth>0.001</min_depth>
+            </ode>
+          </contact>
+        </surface>
+      </collision>
+    </link>
+
+    <link name="collision_stairs_blue_3">
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://robocon_ground/meshes/collision/stairs_blue_3.obj</uri>
+          </mesh>
+        </geometry>
+        <surface>
+          <friction>
+            <ode>
+              <mu>1.0</mu>
+              <mu2>1.0</mu2>
+            </ode>
+          </friction>
+          <contact>
+            <ode>
+              <kp>1e12</kp>
+              <kd>1.0</kd>
+              <max_vel>0.01</max_vel>
+              <min_depth>0.001</min_depth>
+            </ode>
+          </contact>
+        </surface>
+      </collision>
+    </link>
+
+    <link name="collision_stairs_blue_4">
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://robocon_ground/meshes/collision/stairs_blue_4.obj</uri>
+          </mesh>
+        </geometry>
+        <surface>
+          <friction>
+            <ode>
+              <mu>1.0</mu>
+              <mu2>1.0</mu2>
+            </ode>
+          </friction>
+          <contact>
+            <ode>
+              <kp>1e12</kp>
+              <kd>1.0</kd>
+              <max_vel>0.01</max_vel>
+              <min_depth>0.001</min_depth>
+            </ode>
+          </contact>
+        </surface>
+      </collision>
+    </link>
+
+    <!-- ========== 15. L1 层上的两个小障碍（新增）========== -->
+    <!-- 视觉网格：1.0(x) x 0.3(y) x 0.15(z)，位于 (0, ±1.65)，z 0.60~0.75 -->
+    <link name="collision_l1_obstacle_north">
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://robocon_ground/meshes/collision/l1_obstacle_north.obj</uri>
+          </mesh>
+        </geometry>
+        <surface>
+          <friction>
+            <ode>
+              <mu>1.0</mu>
+              <mu2>1.0</mu2>
+            </ode>
+          </friction>
+        </surface>
+      </collision>
+    </link>
+
+    <link name="collision_l1_obstacle_south">
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://robocon_ground/meshes/collision/l1_obstacle_south.obj</uri>
+          </mesh>
+        </geometry>
+        <surface>
+          <friction>
+            <ode>
+              <mu>1.0</mu>
+              <mu2>1.0</mu2>
+            </ode>
+          </friction>
+        </surface>
+      </collision>
+    </link>
+
+    <!-- ========== 16. L1 围边（新增，50mm 高，留出坡道/台阶开口）========== -->
+    <!-- 与视觉网格 robocon_004(z 0.60~0.65) 及 MuJoCo 场景中的 6 段围栏一致 -->
+    <link name="collision_l1_rail_left">
+      <collision name="collision">
+        <geometry>
+          <box>
+            <size>0.05 6 0.05</size>
+          </box>
+        </geometry>
+        <pose>-3 0 0.625 0 0 0</pose>
+        <surface>
+          <friction>
+            <ode>
+              <mu>1.0</mu>
+              <mu2>1.0</mu2>
+            </ode>
+          </friction>
+        </surface>
+      </collision>
+    </link>
+
+    <link name="collision_l1_rail_right">
+      <collision name="collision">
+        <geometry>
+          <box>
+            <size>0.05 6 0.05</size>
+          </box>
+        </geometry>
+        <pose>3 0 0.625 0 0 0</pose>
+        <surface>
+          <friction>
+            <ode>
+              <mu>1.0</mu>
+              <mu2>1.0</mu2>
+            </ode>
+          </friction>
+        </surface>
+      </collision>
+    </link>
+
+    <link name="collision_l1_rail_north_a">
+      <collision name="collision">
+        <geometry>
+          <box>
+            <size>3.8 0.05 0.05</size>
+          </box>
+        </geometry>
+        <pose>1.1 3 0.625 0 0 0</pose>
+        <surface>
+          <friction>
+            <ode>
+              <mu>1.0</mu>
+              <mu2>1.0</mu2>
+            </ode>
+          </friction>
+        </surface>
+      </collision>
+    </link>
+
+    <link name="collision_l1_rail_north_b">
+      <collision name="collision">
+        <geometry>
+          <box>
+            <size>1.2 0.05 0.05</size>
+          </box>
+        </geometry>
+        <pose>-2.4 3 0.625 0 0 0</pose>
+        <surface>
+          <friction>
+            <ode>
+              <mu>1.0</mu>
+              <mu2>1.0</mu2>
+            </ode>
+          </friction>
+        </surface>
+      </collision>
+    </link>
+
+    <link name="collision_l1_rail_south_a">
+      <collision name="collision">
+        <geometry>
+          <box>
+            <size>3.8 0.05 0.05</size>
+          </box>
+        </geometry>
+        <pose>1.1 -3 0.625 0 0 0</pose>
+        <surface>
+          <friction>
+            <ode>
+              <mu>1.0</mu>
+              <mu2>1.0</mu2>
+            </ode>
+          </friction>
+        </surface>
+      </collision>
+    </link>
+
+    <link name="collision_l1_rail_south_b">
+      <collision name="collision">
+        <geometry>
+          <box>
+            <size>1.2 0.05 0.05</size>
+          </box>
+        </geometry>
+        <pose>-2.4 -3 0.625 0 0 0</pose>
+        <surface>
+          <friction>
+            <ode>
+              <mu>1.0</mu>
+              <mu2>1.0</mu2>
+            </ode>
+          </friction>
+        </surface>
+      </collision>
+    </link>
+
+  </model>
+</sdf>

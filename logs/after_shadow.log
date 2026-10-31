@@ -1,0 +1,89 @@
+[INFO] [launch]: All log files can be found below /tmp/gzh/.ros/log/2026-10-02-17-02-53-503927-zx-59512
+[INFO] [launch]: Default logging verbosity is set to INFO
+[INFO] [robot_state_publisher-1]: process started with pid [59525]
+[INFO] [gzserver-2]: process started with pid [59527]
+[INFO] [gzclient-3]: process started with pid [59529]
+[INFO] [pointcloud_to_laserscan_node-4]: process started with pid [59531]
+[gzserver-2] Gazebo multi-robot simulator, version 11.10.2
+[gzserver-2] Copyright (C) 2012 Open Source Robotics Foundation.
+[gzserver-2] Released under the Apache 2 License.
+[gzserver-2] http://gazebosim.org
+[gzserver-2] 
+[robot_state_publisher-1] [WARN] [1790931774.679238946] [kdl_parser]: The root link base_link has an inertia specified in the URDF, but KDL does not support a root link with an inertia.  As a workaround, you can add an extra dummy link to your URDF.
+[robot_state_publisher-1] [INFO] [1790931774.679285888] [robot_state_publisher]: got segment base_link
+[robot_state_publisher-1] [INFO] [1790931774.679307956] [robot_state_publisher]: got segment imu_link
+[robot_state_publisher-1] [INFO] [1790931774.679310806] [robot_state_publisher]: got segment livox_frame
+[robot_state_publisher-1] [INFO] [1790931774.679313082] [robot_state_publisher]: got segment wheel_1
+[robot_state_publisher-1] [INFO] [1790931774.679315226] [robot_state_publisher]: got segment wheel_2
+[robot_state_publisher-1] [INFO] [1790931774.679317369] [robot_state_publisher]: got segment wheel_3
+[robot_state_publisher-1] [INFO] [1790931774.679319363] [robot_state_publisher]: got segment wheel_4
+[gzserver-2] [1;33m[Wrn] [gazebo_ros_init.cpp:178] [0m[1;33m
+[gzserver-2] #     # ####### ####### ###  #####  #######
+[gzserver-2] ##    # #     #    #     #  #     # #
+[gzserver-2] # #   # #     #    #     #  #       #
+[gzserver-2] #  #  # #     #    #     #  #       #####
+[gzserver-2] #   # # #     #    #     #  #       #
+[gzserver-2] #    ## #     #    #     #  #     # #
+[gzserver-2] #     # #######    #    ###  #####  #######
+[gzserver-2] 
+[gzserver-2] This version of Gazebo, now called Gazebo classic, reaches end-of-life
+[gzserver-2] in January 2025. Users are highly encouraged to migrate to the new Gazebo
+[gzserver-2] using our migration guides (https://gazebosim.org/docs/latest/gazebo_classic_migration?utm_source=gazebo_ros_pkgs&utm_medium=cli)
+[gzserver-2] 
+[gzserver-2] [0m[1;33m
+[pointcloud_to_laserscan_node-4] [INFO] [1790931774.786082629] [pointcloud_to_laserscan]: Got a subscriber to laserscan, starting pointcloud subscriber
+[gzserver-2] [1;32m[Msg] [0m[1;32mWaiting for master.[0m[1;32m
+[gzserver-2] [0m[1;32m[0m[1;32m[0m[1;32m[Msg] [0m[1;32mConnected to gazebo master @ [0m[1;32mhttp://127.0.0.1:11345[0m[1;32m
+[gzserver-2] [0m[1;32m[0m[1;32m[0m[1;32m[Msg] [0m[1;32mPublicized address: [0m[1;32m10.6.217.26[0m[1;32m
+[gzserver-2] [0m[1;32m[0m[1;32m[0m[1;32m[Msg] [0m[1;32mLoading world file [[0m[1;32m/home/zx/ITEM/RC_ground_sim/gazebo_models/robocon_track.world[0m[1;32m][0m[1;32m
+[gzserver-2] [0m[1;33m[0m[1;33m[0m[1;33m[Wrn] [OBJLoader.cc:146] [0m[1;33mMissing material for shape[[0m[1;33m[0m[1;33m] [0m[1;33min OBJ file[[0m[1;33m/home/zx/ITEM/RC_ground_sim/gazebo_models/robocon_ground/meshes/collision/ramp_red.obj[0m[1;33m][0m[1;33m
+[gzserver-2] [0m[1;33m[0m[1;33m[0m[1;33m[Wrn] [OBJLoader.cc:146] [0m[1;33mMissing material for shape[[0m[1;33m[0m[1;33m] [0m[1;33min OBJ file[[0m[1;33m/home/zx/ITEM/RC_ground_sim/gazebo_models/robocon_ground/meshes/collision/ramp_blue.obj[0m[1;33m][0m[1;33m
+[gzserver-2] [0m[1;33m[0m[1;33m[0m[1;33m[Wrn] [OBJLoader.cc:146] [0m[1;33mMissing material for shape[[0m[1;33m[0m[1;33m] [0m[1;33min OBJ file[[0m[1;33m/home/zx/ITEM/RC_ground_sim/gazebo_models/robocon_ground/meshes/collision/stairs_red_1.obj[0m[1;33m][0m[1;33m
+[gzserver-2] [0m[1;33m[0m[1;33m[0m[1;33m[Wrn] [OBJLoader.cc:146] [0m[1;33mMissing material for shape[[0m[1;33m[0m[1;33m] [0m[1;33min OBJ file[[0m[1;33m/home/zx/ITEM/RC_ground_sim/gazebo_models/robocon_ground/meshes/collision/stairs_red_2.obj[0m[1;33m][0m[1;33m
+[gzserver-2] [0m[1;33m[0m[1;33m[0m[1;33m[Wrn] [OBJLoader.cc:146] [0m[1;33mMissing material for shape[[0m[1;33m[0m[1;33m] [0m[1;33min OBJ file[[0m[1;33m/home/zx/ITEM/RC_ground_sim/gazebo_models/robocon_ground/meshes/collision/stairs_red_3.obj[0m[1;33m][0m[1;33m
+[gzserver-2] [0m[1;33m[0m[1;33m[0m[1;33m[Wrn] [OBJLoader.cc:146] [0m[1;33mMissing material for shape[[0m[1;33m[0m[1;33m] [0m[1;33min OBJ file[[0m[1;33m/home/zx/ITEM/RC_ground_sim/gazebo_models/robocon_ground/meshes/collision/stairs_red_4.obj[0m[1;33m][0m[1;33m
+[gzserver-2] [0m[1;33m[0m[1;33m[0m[1;33m[Wrn] [OBJLoader.cc:146] [0m[1;33mMissing material for shape[[0m[1;33m[0m[1;33m] [0m[1;33min OBJ file[[0m[1;33m/home/zx/ITEM/RC_ground_sim/gazebo_models/robocon_ground/meshes/collision/stairs_blue_1.obj[0m[1;33m][0m[1;33m
+[gzserver-2] [0m[1;33m[0m[1;33m[0m[1;33m[Wrn] [OBJLoader.cc:146] [0m[1;33mMissing material for shape[[0m[1;33m[0m[1;33m] [0m[1;33min OBJ file[[0m[1;33m/home/zx/ITEM/RC_ground_sim/gazebo_models/robocon_ground/meshes/collision/stairs_blue_2.obj[0m[1;33m][0m[1;33m
+[gzserver-2] [0m[1;33m[0m[1;33m[0m[1;33m[Wrn] [OBJLoader.cc:146] [0m[1;33mMissing material for shape[[0m[1;33m[0m[1;33m] [0m[1;33min OBJ file[[0m[1;33m/home/zx/ITEM/RC_ground_sim/gazebo_models/robocon_ground/meshes/collision/stairs_blue_3.obj[0m[1;33m][0m[1;33m
+[gzserver-2] [0m[1;33m[0m[1;33m[0m[1;33m[Wrn] [OBJLoader.cc:146] [0m[1;33mMissing material for shape[[0m[1;33m[0m[1;33m] [0m[1;33min OBJ file[[0m[1;33m/home/zx/ITEM/RC_ground_sim/gazebo_models/robocon_ground/meshes/collision/stairs_blue_4.obj[0m[1;33m][0m[1;33m
+[gzserver-2] [0m[1;33m[0m[1;33m[0m[1;33m[Wrn] [OBJLoader.cc:146] [0m[1;33mMissing material for shape[[0m[1;33m[0m[1;33m] [0m[1;33min OBJ file[[0m[1;33m/home/zx/ITEM/RC_ground_sim/gazebo_models/robocon_ground/meshes/collision/l1_obstacle_north.obj[0m[1;33m][0m[1;33m
+[gzserver-2] [0m[1;33m[0m[1;33m[0m[1;33m[Wrn] [OBJLoader.cc:146] [0m[1;33mMissing material for shape[[0m[1;33m[0m[1;33m] [0m[1;33min OBJ file[[0m[1;33m/home/zx/ITEM/RC_ground_sim/gazebo_models/robocon_ground/meshes/collision/l1_obstacle_south.obj[0m[1;33m][0m[1;33m
+[gzserver-2] [0m[1;33m[0m[1;33m[0m[INFO] [1790931775.241835565] [gazebo_ros_state]: Publishing states of gazebo models at [/model_states]
+[gzserver-2] [INFO] [1790931775.247399030] [gazebo_ros_state]: Publishing states of gazebo links at [/link_states]
+[INFO] [spawn_entity.py-5]: process started with pid [59799]
+[spawn_entity.py-5] [INFO] [1790931778.935245160] [spawn_omni4]: Spawn Entity started
+[spawn_entity.py-5] [INFO] [1790931778.935420846] [spawn_omni4]: Loading entity published on topic robot_description
+[spawn_entity.py-5] [INFO] [1790931778.936524509] [spawn_omni4]: Waiting for entity xml on robot_description
+[spawn_entity.py-5] [INFO] [1790931778.947561800] [spawn_omni4]: Waiting for service /spawn_entity, timeout = 120
+[spawn_entity.py-5] [INFO] [1790931778.947703855] [spawn_omni4]: Waiting for service /spawn_entity
+[spawn_entity.py-5] [INFO] [1790931778.949849211] [spawn_omni4]: Calling service /spawn_entity
+[spawn_entity.py-5] [INFO] [1790931779.248133443] [spawn_omni4]: Spawn status: SpawnEntity: Successfully spawned entity [omni4_field]
+[gzserver-2] [INFO] [1790931779.287825992] [LivoxPointsPlugin]: load csv file name: /home/zx/SCURC_Nav_Sim/install/ros2_livox_simulation/share/ros2_livox_simulation/scan_mode/mid360.csv
+[INFO] [spawn_entity.py-5]: process has finished cleanly [pid 59799]
+[gzserver-2] cannot convert str:
+[gzserver-2] data size:800000
+[gzserver-2] [INFO] [1790931779.622618134] [LivoxPointsPlugin]: ros topic name: /livox/lidar
+[gzserver-2] [INFO] [1790931779.630017826] [LivoxPointsPlugin]: scan info size: 800000
+[gzserver-2] [INFO] [1790931779.630305958] [LivoxPointsPlugin]: sample: 20000
+[gzserver-2] [INFO] [1790931779.630311747] [LivoxPointsPlugin]: downsample: 4
+[gzserver-2] [INFO] [1790931780.289180918] [omni4_planar_move]: Subscribed to [/cmd_vel]
+[gzserver-2] [INFO] [1790931780.306690788] [omni4_planar_move]: Advertise odometry on [/odom]
+[gzserver-2] [INFO] [1790931780.308095033] [omni4_planar_move]: Publishing odom transforms between [odom] and [base_link]
+[gzserver-2] [INFO] [1790931780.348866953] [omni4_joint_state]: Going to publish joint [base_to_wheel1]
+[gzserver-2] [INFO] [1790931780.348885083] [omni4_joint_state]: Going to publish joint [base_to_wheel2]
+[gzserver-2] [INFO] [1790931780.348888990] [omni4_joint_state]: Going to publish joint [base_to_wheel3]
+[gzserver-2] [INFO] [1790931780.348891950] [omni4_joint_state]: Going to publish joint [base_to_wheel4]
+[WARNING] [launch]: user interrupted with ctrl-c (SIGINT)
+[INFO] [pointcloud_to_laserscan_node-4]: sending signal 'SIGINT' to process[pointcloud_to_laserscan_node-4]
+[INFO] [gzclient-3]: sending signal 'SIGINT' to process[gzclient-3]
+[INFO] [gzserver-2]: sending signal 'SIGINT' to process[gzserver-2]
+[INFO] [robot_state_publisher-1]: sending signal 'SIGINT' to process[robot_state_publisher-1]
+[pointcloud_to_laserscan_node-4] [INFO] [1790931784.400104290] [rclcpp]: signal_handler(SIGINT/SIGTERM)
+[robot_state_publisher-1] [INFO] [1790931784.400145109] [rclcpp]: signal_handler(SIGINT/SIGTERM)
+[pointcloud_to_laserscan_node-4] [INFO] [1790931784.402441559] [rclcpp]: signal_handler(SIGINT/SIGTERM)
+[robot_state_publisher-1] [INFO] [1790931784.403737789] [rclcpp]: signal_handler(SIGINT/SIGTERM)
+[INFO] [robot_state_publisher-1]: process has finished cleanly [pid 59525]
+[INFO] [pointcloud_to_laserscan_node-4]: process has finished cleanly [pid 59531]
+[INFO] [gzserver-2]: process has finished cleanly [pid 59527]
+[gzserver-2] [0m[1;32m[0m[1;32m[0m[1;36m[0m[1;32m[0m
+[gzserver-2] [1;33m[0m[1;31m[0m

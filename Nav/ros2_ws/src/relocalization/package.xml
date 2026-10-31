@@ -1,0 +1,42 @@
+<?xml version='1.0' encoding='utf-8'?>
+<package format="3">
+  <name>relocalization</name>
+  <version>1.0.0</version>
+  <description>ICP Relocalization</description>
+  <maintainer email="1367256900@qq.com">PolarisXQ</maintainer>
+  <license>Apache-2.0</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <depend>rclcpp</depend>
+  <depend>std_msgs</depend>
+  <depend>nav_msgs</depend>
+  <depend>geometry_msgs</depend>
+  <depend>sensor_msgs</depend>
+  <depend>tf2</depend>
+  <depend>tf2_ros</depend>
+  <depend>tf2_eigen</depend>
+  <depend>tf2_geometry_msgs</depend>
+  <depend>pcl_ros</depend>
+  <depend>octomap_ros</depend>
+  <depend>livox_ros_driver2</depend>
+
+  <!--
+    【本地修复】small_gicp 与 teaserpp 必须在这里声明。
+    CMakeLists.txt 用 find_package(small_gicp REQUIRED) / find_package(teaserpp REQUIRED)
+    强依赖这两个包（都是 colcon 可见的 plain-cmake 包），但原 package.xml 完全没写：
+
+      * colcon 只能靠 package.xml 推导包之间的编译顺序；
+      * 缺声明时它推不出 relocalization 依赖 small_gicp/teaserpp，
+        在干净工作空间里执行一次性 `colcon build` 时可能先编 relocalization
+        -> find_package 失败 -> 全量编译随机报错。
+
+    原 readme 让用户"分阶段编译"其实就是在绕过这个缺陷。补齐后即可安全全量编译。
+  -->
+  <depend>small_gicp</depend>
+  <depend>teaserpp</depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>

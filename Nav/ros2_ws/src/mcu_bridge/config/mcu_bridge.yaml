@@ -1,0 +1,79 @@
+mcu_bridge:
+  ros__parameters:
+    # ---- 串口 ------------------------------------------------------------
+    # 当前机器人上 CH340 是 /dev/ttyUSB0。更稳的写法（USB 重新枚举也不变）：
+    #   /dev/serial/by-path/pci-0000:00:14.0-usb-0:5:1.0-port0
+    #   /dev/serial/by-id/usb-1a86_USB_Serial-if00-port0
+    # 用 by-id：USB 掉线后重新枚举成 ttyUSB1 也能找到（实测 CH340 会掉线重连）
+    port: "/dev/serial/by-id/usb-1a86_USB_Serial-if00-port0"
+    baudrate: 115200
+    reconnect_interval: 1.0
+    # true = 不开串口，只把第一帧 hex 打到日志（上车联调第一步）
+    dry_run: false
+
+    # ---- 位姿 ------------------------------------------------------------
+    # 当前位姿**首选来源**：LIO 的里程计话题（不依赖 LIO 的 TF 帧名叫什么）
+    #   本仓库 fast_livo -> /aft_mapped_to_init；置空则退回 TF(output_frame <- base_frame)
+    odom_topic: "/aft_mapped_to_init"
+    odom_timeout: 0.5         # 超过这么久没收到里程计就退回 TF
+
+    # 发给 MCU 的坐标系（也是目标点换算的目标系）。
+    #   本仓库 fast_livo 发 odom->base_link，用 "odom"；
+    #   机器人上 SCURM/New_Nav 的 fast_livo 帧名是 camera_init->aft_mapped，
+    #   启动时用 output_frame:=camera_init 覆盖（见 Nav/real/start_robot.sh）
+    output_frame: "odom"
+    base_frame: "base_link"   # 只有退回 TF 时才用
+
+    # ---- 目标点 ----------------------------------------------------------
+    # RViz 的 "2D Goal Pose" 默认发到这里；RViz Fixed Frame 通常是 map，
+    # 本节点会用 TF 把它换算到 output_frame（需要 map->odom，即重定位链路在跑）
+    goal_topic: "/goal_pose"
+
+    # ---- 发给 MCU 的坐标约定（2026-10-31 与 MCU 侧确认）------------------
+    # 雷达（LIO odom）内部是 ROS 标准：x 前、y **左**、yaw **逆时针**正。
+    # MCU 要的是：x 前、y **右**、yaw 仍**逆时针**为正（顺时针为负）。
+    # 所以只有 y 在线上取反，yaw 不变。当前位姿和目标点走同一个变换。
+    #
+    #   odom:  (x, y_L, yaw_CCW)   ->  线:  (x, -y_L, yaw_CCW)
+    #
+    # ⚠ 注意：x 前 + y 右 + yaw 逆时针正 是**左手系**。如果 MCU 里用
+    #   bearing = atan2(y_t - y_c, x_t - x_c) 来算朝向，必须写成 atan2(-Δy, Δx)，
+    #   否则左右会反。
+    y_sign: -1
+    yaw_sign: 1
+    # 雷达相对车头的安装偏角（deg，逆时针为正）：装歪了填这里，位姿和目标一起转
+    mount_yaw_deg: 0.0
+
+    # ---- 发送频率 --------------------------------------------------------
+    publish_rate_hz: 50.0     # 当前位置帧
+    target_rate_hz: 10.0      # 目标位置帧（目标很少变，不需要 50 Hz）
+    # 目标帧最多再发多少秒：收到 /goal_pose 后连续发这么久就停（MCU 侧保持最后目标）。
+    # 0 = 永远重复发（旧行为）。想手动清掉目标：ros2 topic pub --once /mcu_bridge/clear std_msgs/msg/Empty {}
+    target_hold_sec: 5.0
+
+    # ---- 帧格式（0x7E … 0x21）-------------------------------------------
+    current_id: 1             # 0x01
+    target_id: 2              # 0x02
+    sof: 126                  # 0x7E
+    eof: 33                   # 0x21
+    # true  = 帧头后面有 1 字节 ID，帧长 15（已和用户确认，当前/目标各用 0x01/0x02）
+    # false = 没有 ID 字节，帧长 14（= 旧 send_data.py 的格式，只能发当前帧）
+    with_id: true
+    pos_scale: 10000.0        # 米 -> int32
+    ang_scale: 10000.0        # 弧度 -> int32
+    byte_order: "big"         # 大端
+
+    # ---- 调试发布 --------------------------------------------------------
+    publish_poses: true       # /mcu_bridge/current、/mcu_bridge/target（PoseStamped）
+
+    # ---- 旧速度帧（可选）-------------------------------------------------
+    # 打开后同一个进程也发 0x5A/0xED 速度帧（/cmd_vel），替代 mcu_serial_bridge。
+    # 两个进程写同一个串口会打架，所以要用就只留这一个。
+    enable_velocity: false
+    cmd_vel_topic: "/cmd_vel"
+    velocity_rate_hz: 50.0
+    velocity_timeout: 0.2
+    linear_scale: 1000.0
+    angular_scale: 1000.0
+    velocity_byte_order: "little"
+    send_zero_on_shutdown: true

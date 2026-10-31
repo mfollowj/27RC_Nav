@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+
+  <xacro:property name="M_PI" value="3.1415926"/> 
+  <xacro:property name="laser_min_range" value="0.1"/>
+  <xacro:property name="laser_max_range" value="10.0"/>
+  <xacro:property name="samples" value="10000"/>
+  <xacro:property name="resolution" value="0.01"/>
+  <xacro:property name="noise_mean" value="0.0"/>
+  <xacro:property name="noise_stddev" value="0.002"/>
+
+  <xacro:property name="mass" value="0.4" />
+  <xacro:property name="length" value="0.1" />
+  <xacro:property name="width" value="0.06" />
+  <xacro:property name="height" value="0.06" />
+
+  <xacro:macro name="box_inertia" params="m w h d">
+    <inertial>
+      <origin xyz="0 0 0" rpy="${pi/2} 0 ${pi/2}"/>
+      <mass value="${m}"/>
+      <inertia ixx="${(m/12) * (h*h + d*d)}" ixy="0.0" ixz="0.0" iyy="${(m/12) * (w*w + d*d)}" iyz="0.0" izz="${(m/12) * (w*w + h*h)}"/>
+    </inertial>
+  </xacro:macro>
+
+  <xacro:macro name="mid360" params="name:='' parent:= 'base_link' topic:='mid360' *origin ">
+
+    <link name="${name}">
+      <visual>
+        <origin xyz="0.025 -0.0265 -0.025" rpy="${pi/2} 0 ${pi}"/>
+        <geometry>
+          <!-- 原先此处使用 model://mid360.stl 无法解析：model:// 是 Gazebo 专有
+               协议且必须指向"模型目录"(model://<model>/<file>)，不能直接指向
+               文件；而且 ros2_livox_simulation 包内本身不含任何 mesh 文件。
+               结果是 gzserver 在 spawn 机器人时直接退出(exit 255)，RViz 也报
+               Protocol "model" not supported。改回实际存在的 package:// 路径。 -->
+          <mesh filename="package://pangolin_simulation/meshes/mid360.stl" scale="0.0008 0.0008 0.0008"/>
+          <!-- <mesh filename="model://mid360.stl" scale="0.0008 0.0008 0.0008"/> -->
+        </geometry>
+      </visual>
+    </link>
+
+    <joint name="${name}_joint" type="fixed">
+      <parent link="${parent}"/>
+      <child link="${name}"/>
+      <xacro:insert_block name="origin"/>
+    </joint>
+
+    <gazebo reference="${name}">
+      <sensor type="ray" name="${name}">
+        <pose>0 0 0 0 0 0</pose>
+        <!-- 关键修复：Gazebo 的 sensor 默认 always_on=false，此时只有在存在
+             订阅者时才会更新。本 sensor 完全由插件驱动，缺失该项时 ray sensor
+             从不更新，插件的 OnNewLaserScans() 回调永不触发 —— 表现为
+             /livox/lidar 上一帧数据都没有、/scan 全是 inf。
+             同文件的 IMU sensor 正是因为有 <always_on>true</always_on> 才正常。 -->
+        <always_on>true</always_on>
+        <!-- sensor 级 visualize 要求 gzserver 内存在 OGRE 渲染场景(用于在 GUI 中
+             绘制射线)；gzserver 默认不创建该场景，会导致 ray sensor 无法正常
+             更新 —— 表现为 /livox/lidar 话题上一帧数据都没有、经
+             pointcloud_to_laserscan 得到的 /scan 全是 inf。与相机插件同源问题，
+             故关闭可视化(仅影响 GUI 中是否画射线，不影响点云输出)。 -->
+        <visualize>false</visualize>
+        <update_rate>10</update_rate>
+        <plugin name="${name}_plugin" filename="libros2_livox.so">
+          <ray>
+            <scan>
+              <horizontal>
+                <samples>100</samples>
+                <resolution>1</resolution>
+                <min_angle>${0}</min_angle>
+                <max_angle>${2*M_PI}</max_angle>
+              </horizontal>
+              <vertical>
+                <samples>360</samples>
+                <resolution>1</resolution>
+                <min_angle>${-7.22/180*M_PI}</min_angle>
+                <max_angle>${55.22/180*M_PI}</max_angle>
+              </vertical>
+            </scan>
+            <range>
+              <min>${laser_min_range}</min>
+              <max>${laser_max_range}</max>
+              <resolution>${resolution}</resolution>
+            </range>
+            <noise>
+              <type>gaussian</type>
+              <mean>${noise_mean}</mean>
+              <stddev>${noise_stddev}</stddev>
+            </noise>
+          </ray>
+          <visualize>false</visualize>
+          <samples>${samples}</samples>
+          <downsample>10</downsample>
+          <csv_file_name>$(find ros2_livox_simulation)/scan_mode/mid360.csv</csv_file_name>
+          <topic>${topic}</topic>
+        </plugin>
+      </sensor>
+    </gazebo>
+  </xacro:macro>
+
+</robot>

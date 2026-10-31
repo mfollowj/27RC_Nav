@@ -1,0 +1,146 @@
+# ============================================================================
+#  FAST-LIVO2（无视觉 / LiDAR-only）—— **real 与 sim 共用**的唯一参数文件
+# ============================================================================
+#  为什么放在 Nav/config/：M3 的目标是"仿真与真机同一套 LIO、同一套话题、同一份参数"。
+#  以前 real/config/livo_mid360_map.yaml 与仿真 fastlio_field_mid360.yaml 是两份
+#  不同的 LIO（fast_livo vs fast_lio），参数各调各的，仿真结论迁移不到真机。
+#  现在两边都读这一个文件，**平台差异只允许放在 launch 的参数覆盖里**：
+#
+#    real（Nav/real/launch/*.launch.py）：
+#        parameters=[<本文件>, camera_config, {'locate_in_prior_map': ...}]
+#        （外参就是本文件里的真机出厂值，不再覆盖）
+#
+#    sim（rc_field_nav/launch/lio_map.launch.py、nav_prior_map.launch.py）：
+#        parameters=[<本文件>, {'use_sim_time': True},
+#                    {'extrin_calib': {'extrinsic_T': [0.0, 0.0, 0.06]}},
+#                    {'extrin_calib': {'extrinsic_R': 单位阵}},
+#                    {'common': {'imu_topic': '/livox/imu'}}]
+#        仿真里 LiDAR 在 IMU 上方 6 cm（urdf: base 0.36 / imu 0.30），imu 不翻转。
+#
+#  ★ IMU 用**原始** /livox/imu，不要接 cmd_chassis/rot_imu 的输出：
+#    实测原始 IMU 的加速度是 (0, 0, +1 g)（FAST-LIO 期望的"重力朝下"约定），
+#    而 rot_imu 会把 y/z 取反，变成 (0, 0, -1 g) -> fast_livo 的 gravityAlignment()
+#    会做一次 180° 翻转，而那个翻转绕哪根水平轴是**退化的**，于是初始 yaw 变成
+#    -125°/-118°/138° 这种随机值（每次开机都不一样），mcu_bridge 会把它原样发给 MCU。
+#    雷达和 IMU 是同一刚体、出厂标定，LiDAR->IMU 旋转就是单位阵。
+#
+#  ★ 改这个文件 = 同时改真机和仿真。改完真机要重新验证，别只跑仿真。
+#
+#  数据流（real/sim 一致）：
+#      /livox/lidar (CustomMsg, 15Hz)
+#        -> livox_preprocess.py（等步长抽稀 + 量程/高度过滤，保留 offset_time）
+#        -> /livox/lidar_filtered
+#        -> fastlivo_mapping -> /cloud_registered, /Laser_map,
+#                               TF odom->base_link, /aft_mapped_to_init
+#
+#  M3 迁移说明（2026-10-30）：
+#    * 仿真原来用 fast_lio（另一份 mid360 yaml），已切到本文件 + fast_livo；
+#    * 仿真现在也跑 livox_preprocess.py，话题与真机完全一致（/livox/lidar_filtered）；
+#    * 仿真外参由 launch 覆盖，其余参数与真机逐项相同。
+# ============================================================================
+
+/**:
+  ros__parameters:
+    # ── 定位模式开关（由 launch 覆盖，这里给"建图"默认值）────────────────
+    #   false = 建图（阶段 A）：边跑边建体素地图
+    #   true  = 先验图跟踪（阶段 B）：等 /relocalization_result 播种后只做
+    #           scan-to-prior-map 匹配，抗漂移强得多
+    locate_in_prior_map: false
+    prior_map_path: ""
+
+    common:
+      img_topic: "/left_camera/image"
+      lid_topic: "/livox/lidar_filtered"   # ← 抽稀/滤波后的雷达（real/sim 同一个话题）
+      imu_topic: "/livox/imu"              # ← 原始 IMU（加速度 +1 g z）；不要接 rot_imu 的 /imu/data
+      img_en: 0                            # 0 = 无视觉版（根本不订阅图像）
+      lidar_en: 1
+      ros_driver_bug_fix: false
+
+    extrin_calib:
+      # LiDAR 在 **IMU 系**下的平移，真机 Mid-360 出厂标定值。
+      # 仿真用 launch 覆盖成 [0, 0, 0.06]，不要改这里去迁就仿真。
+      # 若贵车做过 LiDAR-IMU 联合标定，把标定结果替换进来（这一步直接决定精度）。
+      extrinsic_T: [-0.011, -0.02329, 0.04412]
+      # LiDAR -> IMU：同一刚体、出厂标定，单位阵（原始 IMU 与雷达点同向）
+      extrinsic_R: [1.0, 0.0, 0.0,
+                    0.0, 1.0, 0.0,
+                    0.0, 0.0, 1.0]
+      Rcl: [1.0, 0.0, 0.0,
+            0.0, 1.0, 0.0,
+            0.0, 0.0, 1.0]                 # img_en=0 时不参与计算
+      Pcl: [0.0, 0.0, 0.0]
+
+    time_offset:
+      imu_time_offset: 0.0                 # IMU 与雷达有明显时延才在这里补偿
+      img_time_offset: 0.0
+      exposure_time_init: 0.0
+
+    preprocess:
+      point_filter_num: 1                  # 已在 livox_preprocess.py 里抽稀过
+      filter_size_surf: 0.1                # 单帧降采样体素
+      # ★ 必须显式给 filter_size_map，且取 lio.voxel_size 的约 1/4：
+      #   本工程这版 fast_livo 在"先验地图灌图"阶段对这条很敏感 —— filter_size_map
+      #   与 voxel_size 同尺度时体素里拟合不出平面，LIO 只剩 IMU 积分 -> 必然发散。
+      filter_size_map: 0.05
+      lidar_type: 1                        # 1 = Livox CustomMsg（保留 offset_time，才能去畸变）
+      scan_line: 4
+      scan_rate: 15                     # = 驱动 publish_freq（真机 15 Hz，仿真同样 15 Hz）
+      blind: 0.5                           # 0.5 m 内不取点（车体/支架自身遮挡）
+
+    vio:                                   # 无视觉模式不生效，保留默认便于以后开视觉
+      max_iterations: 5
+      outlier_threshold: 1000
+      img_point_cov: 100
+      patch_size: 8
+      patch_pyrimid_level: 4
+      normal_en: true
+      raycast_en: false
+      inverse_composition_en: false
+      exposure_estimate_en: true
+      inv_expo_cov: 0.1
+
+    imu:
+      imu_en: true
+      imu_int_frame: 30
+      acc_cov: 0.8                         # 真机先按作者值；抖动大再往下调
+      gyr_cov: 0.5
+      b_acc_cov: 0.001
+      b_gyr_cov: 0.001
+
+    lio:
+      max_iterations: 5
+      dept_err: 0.02
+      beam_err: 0.15
+      min_eigen_value: 0.005
+      voxel_size: 0.2                      # 室内 0.2 m 合适（0.5 太粗）
+      max_layer: 2
+      max_points_num: 50
+      layer_init_num: [5, 5, 5, 5, 5]
+
+    local_map:
+      map_sliding_en: false
+      half_map_size: 100
+      sliding_thresh: 8.0
+
+    uav:
+      imu_rate_odom: false
+      gravity_align_en: true               # 起始静止 1~2 s 再动，重力对齐才准
+
+    publish:
+      dense_map_en: true
+      pub_effect_point_en: false
+      pub_plane_en: false
+      pub_scan_num: 1                      # 1 = 每帧都发 /cloud_registered（重定位要用）
+      blind_rgb_points: 0.0
+      initial_frame_id: "odom"             # LIO 世界系 = odom（原点 = 开机时 IMU 位置）
+      odom_frame_id: "base_link"           # 直接发 odom->base_link（Nav2 需要）
+
+    evo:
+      seq_name: "mid360"
+      pose_output_en: false
+
+    pcd_save:
+      pcd_save_en: false                   # 用 scripts/save_prior_map.sh 主动存（能同时存轨迹/转 2D）
+      colmap_output_en: false
+      filter_size_pcd: 0.15
+      interval: -1

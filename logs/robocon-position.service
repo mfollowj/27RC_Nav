@@ -1,0 +1,28 @@
+[Unit]
+Description=SCU27RC_Nav robot stack (livox driver + fast_livo + mcu_bridge)
+Documentation=file:///home/rc/SCU27RC_Nav/Nav/real/start_robot.sh
+After=network-online.target
+Wants=network-online.target
+# 永远不因为失败次数过多而放弃重启
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+User=rc
+Group=rc
+SupplementaryGroups=dialout
+WorkingDirectory=/home/rc/SCU27RC_Nav
+Environment=HOME=/home/rc
+Environment=ROS_DOMAIN_ID=42
+# 1 = 只打日志不往串口写字节（MCU 固件没就绪时临时用）
+Environment=MCU_DRY_RUN=0
+ExecStart=/bin/bash /home/rc/SCU27RC_Nav/Nav/real/start_robot.sh
+Restart=always
+RestartSec=5
+TimeoutStopSec=30
+KillMode=mixed
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

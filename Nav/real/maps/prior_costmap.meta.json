@@ -1,0 +1,54 @@
+{
+  "ground_z": 0.006599999999999999,
+  "imu_height": 0.003,
+  "resolution": 0.05,
+  "origin": [
+    -3.0257,
+    -3.0139,
+    0.0
+  ],
+  "h_min": 0.15,
+  "h_max": 2.0,
+  "size_m": [
+    6.050000000000001,
+    6.050000000000001
+  ],
+  "points": 21886,
+  "ratio": {
+    "occupied": 0.15217539785533776,
+    "free": 0.01072331124923161,
+    "unknown": 0.8371012908954306
+  },
+  "terrain": {
+    "elev_cells": 518,
+    "obstacle_cells": 2002,
+    "unreached_cells": 1648,
+    "stair_edge_cells": 0,
+    "stair_zone_cells": 0,
+    "slope_edge_cells": 0,
+    "mid_cost_cells": 8,
+    "low_pass_cells": 18,
+    "ramp_cells": 0,
+    "occupied_cells": 2002,
+    "slope_free_slope_deg": 5.0,
+    "slope_max_slope_deg": 30.0,
+    "stair_cells": 0,
+    "stair_traj_segments": 0,
+    "stair_dilate_m": 0.1,
+    "edge_cells_as": "unknown",
+    "cost_files": {
+      "cost_pgm": "prior_costmap_cost.pgm",
+      "traversability_png": "prior_costmap_traversability.png"
+    },
+    "max_slope_deg": 15.0,
+    "max_step_m": 0.08,
+    "min_obstacle_h_m": 0.12,
+    "elev_seed_cells": 113,
+    "elev_file": "prior_costmap_elev.npy"
+  },
+  "corridor_occupied": {
+    "legacy_height_band": 16,
+    "terrain": 16,
+    "corridor_cells": 317
+  }
+}

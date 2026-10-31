@@ -4,32 +4,39 @@
 # 原则：仓库只放"源码 + 配置 + 文档 + 小数据"，编译产物/运行日志/系统级依赖不进 git。
 
 # ---- 编译产物 --------------------------------------------------------------
-Deps/build/
-Deps/install/
-Deps/log/
+/build/
+/install/
+/log/
+/third_party/build/
+/third_party/install/
+/third_party/log/
+third_party/**/build/
+/src/build/
+/src/log/
+
+# 从旧版本更新时，原目录内可能仍有未跟踪的编译产物。
+/Deps/build/
+/Deps/install/
+/Deps/log/
 Deps/**/build/
-Nav/ros2_ws/build/
-Nav/ros2_ws/install/
-Nav/ros2_ws/log/
-Nav/ros2_ws/src/build/
-Nav/ros2_ws/src/log/
+/Nav/ros2_ws/build/
+/Nav/ros2_ws/install/
+/Nav/ros2_ws/log/
+/Nav/ros2_ws/src/build/
+/Nav/ros2_ws/src/log/
+/Nav/ros2_ws/Livox-SDK2/
 **/__pycache__/
 **/*.pyc
 **/*.pyo
 **/.pytest_cache/
 
-# ---- 系统级第三方 SDK（按 Deps/README 装到 /usr/local，不随仓库）----------
-Nav/ros2_ws/Livox-SDK2/
+# ---- 系统级第三方 SDK（按 third_party/README 装到 /usr/local）------------
+/Livox-SDK2/
 
-# ---- 运行日志（保留自己写的小脚本和 service 文件）-------------------------
-logs/*
-!logs/*.py
-!logs/*.sh
-!logs/*.service
-!logs/*.md
+# ---- 新运行日志；已归档的历史资料由 Git 继续跟踪 -------------------------
+/logs/
 
 # ---- 一次性/临时 ----------------------------------------------------------
 *.log
-!logs/*.log
 .DS_Store
 *.swp

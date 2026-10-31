@@ -1,0 +1,45 @@
+<?xml version='1.0' encoding='utf-8'?>
+<sdf version="1.8">
+  <model name="cn_v3_draft_earth_blue">
+    <static>false</static>
+    <link name="body">
+      <inertial>
+        <mass>0.6</mass>
+        <inertia>
+          <ixx>0.012249999999999997</ixx>
+          <iyy>0.012249999999999997</iyy>
+          <izz>0.012249999999999997</izz>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyz>0</iyz>
+        </inertia>
+      </inertial>
+      <collision name="collision">
+        <geometry>
+          <box>
+            <size>0.35 0.35 0.35</size>
+          </box>
+        </geometry>
+        <surface>
+          <friction>
+            <ode>
+              <mu>0.6</mu>
+              <mu2>0.6</mu2>
+            </ode>
+          </friction>
+        </surface>
+      </collision>
+      <visual name="body">
+        <geometry>
+          <box>
+            <size>0.35 0.35 0.35</size>
+          </box>
+        </geometry>
+        <material>
+          <ambient>0.1960784314 0 1 1</ambient>
+          <diffuse>0.1960784314 0 1 1</diffuse>
+        </material>
+      </visual>
+    </link>
+  </model>
+</sdf>

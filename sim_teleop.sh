@@ -9,7 +9,7 @@
 set +u
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # 私有 DDS 域(42) + 私有 Gazebo 端口(11355) + 全部环境依赖，说明见 env.sh
-source "${ROOT}/env.sh"
+source "${ROOT}/env.sh" || exit
 echo "[环境] ROS_DOMAIN_ID=${ROS_DOMAIN_ID}  GAZEBO_MASTER_URI=${GAZEBO_MASTER_URI}"
 
 exec ros2 run rc_field_nav omni_teleop.py "$@"

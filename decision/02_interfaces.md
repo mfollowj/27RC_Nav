@@ -1,0 +1,835 @@
+# 02 · 接口契约
+
+> 目录说明：本文件是决策设计稿，测量与历史证据保留当时的数值和路径；当前源码位置见 [源码索引](../docs/source_index.md)，迁移对照见 [命名规则](../docs/naming.md)。
+
+> 状态：设计稿（v0.1，2026-10-31）　｜　上游：[01-框架设计](01_framework.md)
+> 原则：**先定契约，再写实现**。契约里的字段、单位、帧、状态机语义一旦确定，
+> 各模块可以并行开发；改契约必须升 `contract` 版本并同步本文档。
+
+---
+
+## 0. 总则
+
+| 项 | 约定 |
+| --- | --- |
+| 单位 | SI：米、弧度、秒；角度对外显示可用度，消息里一律弧度 |
+| 帧 | 元素配置用 `field`；Nav2 目标用 `map`；车体位姿用 TF `map→base_link` |
+| 时间 | 比赛逻辑一律用 `/match/clock` 的 `match_time`；ROS 时间只用于消息 stamp |
+| 命名 | 决策层话题统一 `/decide/*`；比赛输入 `/match/*`；服务统一 `/decide/*` |
+| QoS | 状态/事件 `RELIABLE, depth=10`；时钟 `RELIABLE, depth=1`；TF 默认 |
+| 版本 | 所有 YAML 带 `contract: 1`；消息包 `decide_msgs` 版本与本文档一致 |
+| 兼容 | String 类消息只**追加** `key=value`，不删不改已有 key；解析器必须忽略未知 key |
+
+**ID 规则**：元素 ID 用 `snake_case`，全局唯一，建议 `<side>_<kind>_<name>`，例如
+`own_l1_near`、`shared_l2_a`、`stone_ground`。日志、人工输入、元素状态都用这个 ID，
+不允许用索引。
+
+**两种时间，不能混用**：
+
+| 用途 | 时钟 | 说明 |
+| --- | --- | --- |
+| 阶段、决策点、任务 `deadline` | `/match/clock` 的 `match_time` | 仿真可加速，只用于"比赛逻辑" |
+| 技能 `timeout_s`、看门狗、状态 age | `time.monotonic()`（wall） | 必须按真实执行时间，不能跟着比赛时钟加速 |
+
+仿真把比赛时钟调成 5× 只用于验证 48/150/177 的边界，**不能**同时把技能超时也乘 5，
+否则会掩盖真实的执行超时。
+
+---
+
+## 1. 输入契约
+
+### 1.1 `/reloc_status`（std_msgs/String，2 Hz）
+
+**发布者**：`robot/scripts/reloc_bridge.py`（真机与仿真同一条链路）。
+
+**格式**（当前实现，逐字）：
+
+```
+mode=%s icp=%d applied=%d first=%d recover=%d spread=%.2f m / %.1f deg diff=%.2f m / %.1f deg res_max=%.2f m / %.1f deg lio_norm=%.2f
+```
+
+示例（`logs/p3_nav/reloc_status.txt`）：
+
+```
+mode=TRACKING icp=196 applied=1 first=1 recover=0 spread=0.02 m / 0.6 deg diff=0.19 m / 1.9 deg res_max=0.23 m / 3.0 deg lio_norm=0.18
+```
+
+| 字段 | 含义 | 决策层用法 |
+| --- | --- | --- |
+| `mode` | `BOOTSTRAP` / `SEARCHING` / `APPLIED` / `TRACKING` | **唯一**的定位状态依据 |
+| `icp` | 收到的 ICP 结果帧数 | 诊断；长期不涨说明重定位节点挂了 |
+| `applied` | 已采纳的重定位次数 | `applied ≥ 1` 才可能已定位 |
+| `first` | 首次定位次数 | 诊断 |
+| `recover` | 漂移修正次数 | 诊断；突增说明 LIO 在漂 |
+| `spread` | 首次定位前，多帧绝对位姿的最大离散 | **只在首次定位前有意义**；已定位后不要用 |
+| `diff` | 已定位后，重定位结果 vs 当前估计的残差 | 实时可信度门控的主要依据 |
+| `res_max` | 整场最大残差（会话累计） | **不是当前值**，不能做实时门控 |
+| `lio_norm` | LIO 里程计位移模长（m） | `> 50` 触发 `LOST_RECOVER`；决策层据此提前停 |
+
+**模式语义**：
+
+| mode | 含义 | 是否允许发目标 |
+| --- | --- | --- |
+| `BOOTSTRAP` | 还没有首次定位；**会发 identity `map→odom`** | ❌ 绝对禁止 |
+| `SEARCHING` | 还没有首次定位，且不发 TF | ❌ |
+| `APPLIED` | 刚采纳一次重定位，2 s 内 | ✅（配合 `diff`/age） |
+| `TRACKING` | 已定位超过 2 s | ✅（配合 `diff`/age） |
+| `STALE`（决策层派生） | 状态消息超过 1 s 未更新 | ❌ |
+
+**门控伪代码**（阈值全部在 `policy.yaml`）：
+
+```python
+ok = (mode in {"APPLIED", "TRACKING"}
+      and applied >= 1
+      and age <= 1.0                    # s
+      and diff_m <= 0.5 and diff_deg <= 10.0
+      and lio_norm <= 50.0)
+```
+
+**解析要求**：
+
+- 用正则 `([A-Za-z_]+)=([-+0-9.eE]+)` 提取数值；`mode` 单独取；
+- `spread`、`diff`、`res_max` 每个 key 后面跟**两个数**（`m / deg`），要按顺序取全，不能只取第一个；
+- 忽略 `m`、`deg`、`/` 等修饰词和未来新增的 key；
+- 解析失败 → 视为 `STALE`，**不能**沿用上一次的 `mode` 继续发目标；
+- 状态 age 用**本地单调时钟**计算，不用消息 stamp（String 没有 header）。
+
+**建议的向后兼容扩展**（Nav 侧，非本阶段必须）：
+
+```
+... fitness=0.021 inliers=42 cov_xy=0.003
+```
+
+决策层解析器会忽略未知 key；等 Nav 加上后再把 `fitness/inliers` 纳入门控。
+
+### 1.2 TF
+
+| 变换 | 发布者 | 用途 | 约束 |
+| --- | --- | --- | --- |
+| `map→odom` | `reloc_bridge`（30 Hz） | 全局修正 | **首次定位前是 identity，不能当有效位姿** |
+| `odom→base_link` | FAST-LIVO2 | 局部里程计 | 重定位后会重置 |
+| `map→base_link` | TF 链 | 车体位姿 | lookup 超时 50 ms |
+| `map→field` | `field_server`（静态） | 元素坐标转换 | 启动时校验地图哈希 |
+
+**禁止**：决策层自己发 `map→odom` 或 `odom→base_link`；不允许用 `map→base_link` 反推定位健康。
+
+### 1.3 Nav2 action
+
+| 项 | 值 |
+| --- | --- |
+| Action | `/navigate_to_pose` |
+| 类型 | `nav2_msgs/action/NavigateToPose` |
+| Goal | `pose`（`map` 系 `PoseStamped`）、`behavior_tree`（可空字符串） |
+| Result | `std_msgs/Empty`；结果状态看 action goal status（`action_msgs/GoalStatus`） |
+| Feedback | `current_pose`、`distance_remaining`、`number_of_recoveries`、`estimated_time_remaining` |
+
+**结果映射**：
+
+| `goal_handle.status` | 技能结果 | 处理 |
+| --- | --- | --- |
+| `STATUS_SUCCEEDED` (4) | 成功 | 进入 `VERIFY` |
+| `STATUS_CANCELED` (5) | 被取消 | 若是安全层取消 → `E_PREEMPTED`；否则 `E_CANCELED` |
+| `STATUS_ABORTED` (6) | 失败 | `E_UNREACHABLE`，标记元素冷却 |
+| `STATUS_UNKNOWN` (0) / 超时 | 失败 | `E_TIMEOUT` |
+
+**目标下发规则**：
+
+- `header.frame_id` 必须是 `map`；`stamp` 用当前 ROS 时间（仿真用 `/clock`）；
+- 无朝向要求时 `orientation = {w: 1.0}`；有朝向要求时由 `field.yaml` 的 `approach.yaw` 生成；
+- 发目标前检查 `bt_navigator`/`navigate_to_pose` action server 存在（2 s 超时）；
+- 取消：`cancel_goal_async()` 后必须等 result future 完成，不能只发不等。
+
+**可选预检**：`/compute_path_to_pose`（`nav2_msgs/action/ComputePathToPose`，`planner_server`）。在发目标前做一次规划，失败就直接判不可达，省掉 `NavigateToPose` 的恢复时间。预检超时 3 s，不阻塞主循环（异步）。
+
+**能力边界**（必须写进契约，防止上层误用）：
+
+- Nav2 的目标容差是控制器参数（当前 `0.15 m / 0.20 rad`），**per-goal 不能改**；
+- 需要 ≤5 cm 的对接/建塔，不能只靠 `NavigateToPose`，必须 `align` 技能（见 01 第 6 节）；
+- 2D 代价地图只加载 trinary 障碍图（`prior_costmap.pgm`），`*_cost.pgm` 的地形代价**没有进 Nav2**；坡度/台阶以障碍或 unknown 体现，多级地形的可达性必须单独验收。
+
+### 1.4 MCU 位置桥（真机备选运动后端）
+
+| 项 | 值 |
+| --- | --- |
+| 节点 | `mcu_bridge`（`src/mcu_bridge`） |
+| 目标输入 | `/goal_pose`（`geometry_msgs/PoseStamped`，通常 `map` 系） |
+| 转换 | 用 TF 把 `map` 目标换到 `output_frame`（默认 `odom`） |
+| 串口 | `/dev/ttyUSB0`，115200 8N1，15 字节帧 |
+| 帧 | 两帧同形：`7E 01 x y yaw 21`（当前）或 `7E 02 x y yaw 21`（目标），共 15 字节；`x/y/yaw` 为 int32 大端 ×10000 |
+| 频率 | 当前位姿 50 Hz；目标 10 Hz |
+| 到位回执 | **无**；只有 `/mcu_bridge/status`（1 Hz，`cur=... tgt=... port_open=...`） |
+
+**完成判定**：`skill_server` 用 TF `map→base_link` 到目标位姿的距离 ≤ `tol_xy` 且 yaw 误差 ≤ `tol_yaw`，连续稳定 `N=10` 帧（0.2 s），才判成功。
+
+**取消语义**：MCU 没有"停止"帧。取消时把**当前位姿**作为新目标发一次（保持原位），若 `enable_velocity=true` 再发零速帧；随后等 0.3 s 再切后端。
+
+**单写者**：`mcu_bridge` 与 Nav2 不能同时驱动底盘。`motion_backend` 二选一；两个都启用 → 启动校验失败。
+
+**真机 `nav2` 后端的额外前提**：Nav2 只会发 `/cmd_vel`，而真机底盘当前吃的是 MCU 串口位置帧。
+要让 `motion_backend=nav2` 在真机成立，必须满足以下之一：
+
+1. 底盘驱动订阅 `/cmd_vel`（并在 `motion_backend=nav2` 时关掉 `mcu_bridge` 的位置帧）；
+2. 用 `mcu_bridge enable_velocity:=true` 把 `/cmd_vel` 转成 `0x5A/0xED` 速度帧发给 MCU，
+   同时关掉 `mcu_bridge` 的位置帧输出（同一个进程只保留一种写者）。
+
+两条都**未经真机验证**。决策层启动时要检查 `/cmd_vel` 的发布者数量；>1 直接拒绝启动。
+
+### 1.5 比赛输入
+
+| 话题 | 类型 | 频率 | 说明 |
+| --- | --- | --- | --- |
+| `/match/clock` | `std_msgs/Float64` | 10 Hz | 比赛时间（秒，从 0 开始） |
+| `/match/state` | `std_msgs/String` | 事件 + 1 Hz | `IDLE/RUNNING/PAUSED/ENDED` |
+| `/match/score` | `decide_msgs/MatchScore` | 事件 + 1 Hz | 本方/对方得分、对手 L2 顶数 |
+| `/match/element_event` | `decide_msgs/ElementEvent` | 事件 | 元素占用/塔顶变化 |
+| `/match/manual` | `decide_msgs/ManualInput` | 事件 | 人工改元素状态/备注 |
+
+没有裁判接口时，`manual_console` 就是这些话题的唯一发布者；有裁判接口时由 `referee_bridge` 发布，人工作为 override。
+
+### 1.6 可选：元素观测
+
+本阶段不实现。若后续加相机/检测，输出统一为 `ElementEvent`（带 `source=perception`、`confidence`），不直接改 `world_state` 内部状态，保证可审计。
+
+---
+
+## 2. 输出契约
+
+### 2.1 决策状态与计划
+
+| 话题 | 类型 | 频率 | 说明 |
+| --- | --- | --- | --- |
+| `/decide/world_state` | `decide_msgs/MatchState` | 10 Hz | 世界模型快照（只读） |
+| `/decide/plan` | `decide_msgs/Plan` | 决策点 + 变化时 | 当前计划（任务列表 + 理由 + 期望分） |
+| `/decide/phase` | `std_msgs/String` | 变化时 | 当前阶段 ID（与 FSM 一致） |
+| `/decide/explain` | `std_msgs/String`（JSON） | 决策点 + 1 Hz | 候选、得分、被否决原因 |
+| `/decide/safety` | `decide_msgs/SafetyStatus` | 20 Hz | 门控状态、否决原因、急停 |
+| `/decide/estop` | `std_msgs/Bool` | 事件 | 急停（true=停） |
+| `/decide/events` | `decide_msgs/MatchEvent` | 事件 | 统一事件流（日志/监视） |
+| `/decide/skill_confirm` | `std_msgs/String` | 事件 | 人工确认当前 `ACT` 技能（内容 = `task_id` 或 `ok`） |
+| `/decide/markers` | `visualization_msgs/MarkerArray` | 2 Hz | RViz 可视化（可选） |
+
+### 2.2 技能 action
+
+| 项 | 值 |
+| --- | --- |
+| Action | `/decide/execute_skill` |
+| 类型 | `decide_msgs/action/ExecuteSkill` |
+| 并发 | 同一时刻 1 个 goal；新 goal 必须先取消旧的 |
+| 取消 | 支持；`ACT` 段取消 = 立即停 + 标记 `E_PREEMPTED` |
+| 反馈 | `phase`（五段）、`progress`、`detail` |
+| 结果 | `success`、`error_code`、`detail`、`elapsed_s` |
+
+### 2.3 服务
+
+| 服务 | 类型 | 说明 |
+| --- | --- | --- |
+| `/decide/start` | `decide_msgs/srv/StartMatch` | 开赛（可带 `t_offset`，便于中途测试） |
+| `/decide/pause` | `std_srvs/srv/Trigger` | 暂停计时与阶段推进 |
+| `/decide/resume` | `std_srvs/srv/Trigger` | 恢复 |
+| `/decide/abort` | `std_srvs/srv/Trigger` | 中止本场，取消所有技能 |
+| `/decide/set_manual` | `decide_msgs/srv/SetManual` | 人工接管开关 |
+| `/decide/reload_config` | `std_srvs/srv/Trigger` | 重载 `policy/skills`（`field` 不允许热改） |
+
+---
+
+## 3. 消息定义（`decide_msgs`）
+
+### 3.1 `MatchState.msg`
+
+```
+std_msgs/Header header
+
+# 比赛时钟：秒，从开赛 0 开始；clock_valid=false 时其余时间字段无意义
+float64 match_time
+bool clock_valid
+string match_state              # IDLE / RUNNING / PAUSED / ENDED
+
+# 阶段（由 decide_manager 回写，仅用于显示/日志；策略内部以自己的 FSM 为准）
+string phase                    # INIT/PRECHECK/READY/OPENING/GATE48/STONE/STONE_GRACE/MID/
+                                # ASSESS150/DEFEND/FLIP/FILL/LASTCALL/FREEZE/FINISHED/FAULT
+uint8 phase_id
+
+# 比分：delta = score_opp - score_own（正数=落后）
+int32 score_own
+int32 score_opp
+bool score_valid
+uint8 opponent_l2_tops          # n
+bool n_valid
+
+# 定位健康
+bool reloc_ok
+string reloc_mode               # BOOTSTRAP/SEARCHING/APPLIED/TRACKING/STALE
+float64 reloc_age               # s
+float64 reloc_diff_m
+float64 reloc_diff_deg
+float64 lio_norm
+
+# 机器人（field 系）
+geometry_msgs/Pose2D robot_pose
+float64 robot_z
+bool pose_valid
+
+# 元素
+ElementState[] elements
+
+# 元信息
+bool manual_override
+string field_version
+string policy_version
+string rules_version
+string map_hash
+```
+
+### 3.2 `ElementState.msg`
+
+```
+string id
+uint8 kind
+uint8 side
+uint8 state
+bool top_flipped
+float32 confidence              # 0..1
+string source                   # config/operator/perception/skill/default
+geometry_msgs/Pose2D pose       # field 系；theta 为朝向
+float32 z                       # 元素基准高度
+float64 state_age               # s，状态最后一次变化距今
+
+# kind
+uint8 KIND_UNKNOWN=0
+uint8 KIND_L1=1
+uint8 KIND_L2=2
+uint8 KIND_STONE=3
+uint8 KIND_BASE=4
+
+# side
+uint8 SIDE_OWN=1
+uint8 SIDE_SHARED=2
+uint8 SIDE_OPP=3
+
+# state
+uint8 STATE_UNKNOWN=0
+uint8 STATE_FREE=1
+uint8 STATE_OWN=2
+uint8 STATE_OPP=3
+uint8 STATE_CONTESTED=4
+uint8 STATE_UNREACHABLE=5
+```
+
+### 3.3 `Task.msg`
+
+```
+string id                       # 任务 ID，唯一
+string skill                    # navigate/align/build_l1/.../wait
+string element_id               # 可空（对齐到临时点）
+geometry_msgs/PoseStamped target
+float64 est_duration            # s，p95 估计
+float64 deadline                # 比赛时间（s），必须在此之前完成
+uint8 priority
+bool preemptible
+string params_json              # 技能私有参数，JSON 字符串
+
+uint8 PRIORITY_SAFETY=0
+uint8 PRIORITY_MUST=1
+uint8 PRIORITY_SHOULD=2
+uint8 PRIORITY_NICE=3
+```
+
+### 3.4 `Plan.msg`
+
+```
+std_msgs/Header header
+string policy_version
+string rules_version
+string reason                   # 规则 ID / 分支名
+float32 expected_score
+float32 risk                    # 0..1
+Task[] tasks
+```
+
+### 3.5 `ExecuteSkill.action`
+
+```
+# goal
+string skill
+string element_id
+geometry_msgs/PoseStamped target
+string params_json
+float64 timeout_s               # s，技能自身超时
+float64 deadline                # 比赛时间，超过必须取消
+---
+# result
+bool success
+uint8 error_code
+string detail
+float64 elapsed_s
+---
+# feedback
+string phase                    # APPROACH/ALIGN/ACT/VERIFY/DEPART
+float32 progress                # 0..1
+string detail
+```
+
+### 3.6 `MatchScore.msg`
+
+```
+std_msgs/Header header
+int32 own
+int32 opp
+uint8 opponent_l2_tops
+bool valid
+string source                   # referee/operator/estimate
+```
+
+### 3.7 `ElementEvent.msg`
+
+```
+string element_id
+uint8 state
+bool top_flipped
+float32 confidence
+string source
+string note
+```
+
+### 3.8 `ManualInput.msg`
+
+```
+string element_id               # 空表示只改比分
+uint8 state
+bool top_flipped
+int32 score_own
+int32 score_opp
+int32 opponent_l2_tops
+bool valid
+string note
+```
+
+### 3.9 `SafetyStatus.msg`
+
+```
+std_msgs/Header header
+bool ok
+string[] vetoes                 # G1..G10 的 ID
+string reason
+bool estop
+bool manual_override
+float64 match_time
+string reloc_mode
+float64 reloc_age
+```
+
+### 3.10 `MatchEvent.msg`
+
+```
+std_msgs/Header header
+float64 match_time
+uint8 severity                  # 0=debug 1=info 2=warn 3=error
+string code                     # 见第 8 节错误码
+string message
+string json                     # 结构化补充
+```
+
+### 3.11 服务定义
+
+```
+# StartMatch.srv
+float64 t_offset
+bool use_manual_clock
+---
+bool accepted
+string message
+
+# SetManual.srv
+bool enabled
+string reason
+---
+bool accepted
+```
+
+---
+
+## 4. `field.yaml` 契约
+
+> 下面的坐标是**仿真占位值**，只用于跑通框架；真值必须按规则图 + 实测标定后替换。
+> 所有 `pose` 都在 `field` 系，`z` 是元素基准高度（地面=0）。
+
+```yaml
+contract: 1
+field_version: "2027-V1-sim-placeholder"
+rules_version: "V1"
+frame: field
+
+# map <- field 的标定结果；换先验图必须重标并更新 map_hash
+map_anchor:
+  x: 0.0
+  y: 0.0
+  yaw: 0.0
+  map_hash: "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+
+bounds:
+  x_min: -5.5
+  x_max: 5.5
+  y_min: -5.5
+  y_max: 5.5
+
+zones:
+  start_own:   {x: -4.3, y: 1.5, yaw: 0.0}
+  safe_retreat:{x: -4.6, y: 0.8, yaw: 0.0}
+
+elements:
+  - id: own_l1_near
+    kind: L1
+    side: own
+    shared: false
+    pose:     {x: -2.2, y: 2.2, z: 0.0, yaw: 1.5708}
+    approach: {x: -2.2, y: 1.4, z: 0.0, yaw: 1.5708}
+    work:     {x: -2.2, y: 1.7, z: 0.0, yaw: 1.5708}
+    approach_tol: {xy: 0.10, yaw_deg: 8.0}
+    work_tol:     {xy: 0.05, yaw_deg: 3.0}
+    value: 85
+    skill: build_l1
+    enabled: true
+
+  - id: own_l1_far
+    kind: L1
+    side: own
+    shared: false
+    pose:     {x: -3.0, y: 3.6, z: 0.0, yaw: 3.1416}
+    approach: {x: -3.0, y: 3.0, z: 0.0, yaw: 3.1416}
+    work:     {x: -3.0, y: 3.3, z: 0.0, yaw: 3.1416}
+    approach_tol: {xy: 0.10, yaw_deg: 8.0}
+    work_tol:     {xy: 0.05, yaw_deg: 3.0}
+    value: 85
+    skill: build_l1
+    enabled: true
+
+  - id: shared_l1
+    kind: L1
+    side: shared
+    shared: true
+    pose:     {x: 1.2, y: 2.4, z: 0.0, yaw: 0.0}
+    approach: {x: 1.2, y: 1.7, z: 0.0, yaw: 0.0}
+    work:     {x: 1.2, y: 2.0, z: 0.0, yaw: 0.0}
+    approach_tol: {xy: 0.10, yaw_deg: 8.0}
+    work_tol:     {xy: 0.05, yaw_deg: 3.0}
+    value: 85
+    skill: build_l1
+    enabled: true
+
+  - id: own_l2_a
+    kind: L2
+    side: own
+    shared: false
+    pose:     {x: 2.4, y: 2.0, z: 0.602, yaw: 0.0}
+    approach: {x: 2.4, y: 1.2, z: 0.602, yaw: 0.0}
+    work:     {x: 2.4, y: 1.6, z: 0.602, yaw: 0.0}
+    approach_tol: {xy: 0.10, yaw_deg: 8.0}
+    work_tol:     {xy: 0.03, yaw_deg: 2.0}
+    value: 155
+    skill: build_l2
+    enabled: true
+
+  - id: own_l2_b
+    kind: L2
+    side: own
+    shared: false
+    pose:     {x: 2.4, y: -2.0, z: 0.602, yaw: 3.1416}
+    approach: {x: 2.4, y: -1.2, z: 0.602, yaw: 3.1416}
+    work:     {x: 2.4, y: -1.6, z: 0.602, yaw: 3.1416}
+    approach_tol: {xy: 0.10, yaw_deg: 8.0}
+    work_tol:     {xy: 0.03, yaw_deg: 2.0}
+    value: 155
+    skill: build_l2
+    enabled: true
+
+  - id: stone_ground
+    kind: STONE
+    side: shared
+    shared: true
+    pose:     {x: 4.15, y: 0.0, z: 0.0, yaw: 3.1416}
+    approach: {x: 3.45, y: 0.0, z: 0.0, yaw: 3.1416}
+    work:     {x: 3.95, y: 0.0, z: 0.0, yaw: 3.1416}
+    approach_tol: {xy: 0.10, yaw_deg: 8.0}
+    work_tol:     {xy: 0.02, yaw_deg: 2.0}
+    value: 255
+    skill: pick_stone
+    enabled: true
+```
+
+**校验规则**：
+
+1. `contract`、`field_version`、`rules_version` 必填；
+2. `id` 唯一；`kind` 与 `skill` 匹配（`L1→build_l1` 等）；
+3. `pose/approach/work` 在 `bounds` 内；`z` 与元素层级一致（L2 在 L1 上）；
+4. `approach_tol.xy` 不得小于 Nav2 的 `xy_goal_tolerance`（否则永远判失败）；
+5. `work_tol` 必须由对应技能后端支持，否则该技能标记不可用；
+6. `map_anchor.map_hash` 必须等于当前 `prior_map.pcd` 的哈希。
+
+---
+
+## 5. `policy.yaml` 契约
+
+```yaml
+contract: 1
+policy_version: "2027-V1-policy-0"
+rules_version: "V1"
+
+clock:
+  total_s: 180
+  opening_end_s: 48
+  stone_deadline_s: 78
+  stone_abort_s: 108
+  mid_end_s: 150
+  last_decision_s: 165
+  freeze_s: 177
+  release_s: 179
+
+scores:
+  L1: 85
+  L2: 155
+  stone: 255
+  flip_swing: 160
+
+# 四个必须实测的时间常数（p95，单位 s）；0 = 未标定
+durations_s:
+  t0: 0.0          # 开局从起点到第一个元素 approach 的转场
+  t1: 0.0          # 建 1 座 L1（含相邻任务转场）
+  t2: 0.0          # 建 1 座 L2（含相邻任务转场）
+  tM: 0.0          # 取石到安放（含转场）
+  tF: 0.0          # 抵达并翻转 1 个敌 L2 顶（含转场）
+  calibrated: false
+  statistic: p95
+
+thresholds:
+  safety_factor: 1.20
+  min_margin_s: 3.0
+  # 由分值反推的比值：t2/t1 < 1.8235 时 L2 优于 L1；tF < 1.0323*t2 时翻顶优于新建 L2
+  l2_vs_l1_ratio: 1.8235
+  flip_vs_l2_ratio: 1.0323
+  # 保护法则：v1 = 已实现的规则谓词；undefined/disabled = 永不通过（fail-closed）
+  protection_law: "undefined"
+
+# 结束阶段的分支规则；按顺序匹配，第一条命中生效
+endgame_rules:
+  - id: defend
+    when: lead_and_n
+    lead_min: 0
+    n_min: 2
+    action: defend
+  - id: flip
+    when: behind_and_n_ge_k
+    action: flip
+  - id: fill_behind
+    when: behind_and_n_lt_k
+    action: fill
+  - id: fill_close
+    when: always
+    action: fill
+
+safety:
+  reloc_modes: [APPLIED, TRACKING]
+  reloc_status_timeout_s: 1.0
+  reloc_max_diff_m: 0.5
+  reloc_max_diff_deg: 10.0
+  reloc_max_lio_norm_m: 50.0
+  tf_timeout_s: 0.05
+  require_goal_in_free_map: true
+  freeze_new_actions_s: 177      # 只能更早；安全层按 min(配置, 177) 执行
+  cancel_all_s: 179              # 只能更早；安全层按 min(配置, 179) 执行
+  max_recover_s: 15.0
+
+manual:
+  allow_operator_override: true
+  require_confirm_skills: ["build_l1", "build_l2", "pick_stone", "place_stone", "flip_top"]
+  score_stale_s: 10.0
+```
+
+**`when` 枚举**（代码实现，新增条件需改代码）：
+
+| 值 | 语义 |
+| --- | --- |
+| `lead_and_n` | `Δ ≤ lead_min`（领先/持平）且 `n ≥ n_min` |
+| `behind_and_n_ge_k` | `Δ > 0` 且 `n ≥ k`，`k = ceil(Δ / flip_swing)` |
+| `behind_and_n_lt_k` | `Δ > 0` 且 `n < k` |
+| `always` | 兜底 |
+
+**注意**：`Δ = score_opp - score_own`。这个符号约定写在契约里，避免实现时把"领先/落后"写反。
+
+---
+
+## 6. `skills.yaml` 契约
+
+```yaml
+contract: 1
+motion_backend: nav2          # nav2 | mcu_position；互斥
+
+skills:
+  navigate:
+    backend: nav2
+    timeout_s: 60
+    retries: 1
+    tolerance: {xy: 0.15, yaw_deg: 12.0}
+    preemptible: true
+    requires_confirm: false
+
+  align:
+    backend: none             # none = 不可用；后续可填 pose_servo/manual
+    timeout_s: 20
+    retries: 0
+    tolerance: {xy: 0.03, yaw_deg: 2.0}
+    preemptible: false
+
+  build_l1:
+    backend: manual_confirm
+    timeout_s: 60
+    retries: 0
+    preemptible: false
+    requires_confirm: true
+
+  build_l2:
+    backend: manual_confirm
+    timeout_s: 60
+    retries: 0
+    preemptible: false
+    requires_confirm: true
+
+  pick_stone:
+    backend: manual_confirm
+    timeout_s: 30
+    retries: 0
+    preemptible: false
+    requires_confirm: true
+
+  place_stone:
+    backend: manual_confirm
+    timeout_s: 30
+    retries: 0
+    preemptible: false
+    requires_confirm: true
+
+  flip_top:
+    backend: manual_confirm
+    timeout_s: 30
+    retries: 0
+    preemptible: false
+    requires_confirm: true
+
+  retreat:
+    backend: nav2
+    timeout_s: 20
+    retries: 1
+    preemptible: true
+
+  wait:
+    backend: timer
+    timeout_s: 30
+    retries: 0
+    preemptible: true
+```
+
+`backend: none` 的技能在 `world_state` 里标记不可用；策略层不得把不可用技能放进计划（硬约束过滤）。
+
+---
+
+## 7. `robot.yaml` 契约
+
+```yaml
+contract: 1
+frames:
+  map: map
+  odom: odom
+  base: base_link
+  field: field
+
+footprint: {length: 0.60, width: 0.46}
+limits: {vx_max: 0.50, vy_max: 0.40, wz_max: 1.00}
+
+prior_map:
+  pcd: "robot/maps/prior_map.pcd"
+  costmap: "robot/maps/prior_costmap.yaml"
+  hash: "sha256:..."
+
+behavior:
+  tick_hz: 10
+  safety_hz: 20
+  use_sim_time: false
+```
+
+---
+
+## 8. 错误码
+
+| 值 | 名称 | 含义 | 是否可重试 |
+| --- | --- | --- | --- |
+| 0 | `OK` | 成功 | — |
+| 1 | `E_RELOC` | 未定位/定位丢失 | 等恢复后可 |
+| 2 | `E_UNREACHABLE` | 规划失败/目标不可达 | 换目标 |
+| 3 | `E_BLOCKED` | 长时间无进展 | 一次 |
+| 4 | `E_TIMEOUT` | 技能超时 | 仅导航一次 |
+| 5 | `E_DEADLINE` | 比赛时间不够 | 否 |
+| 6 | `E_SKILL_NA` | 技能不可用 | 否 |
+| 7 | `E_HW` | 执行机构/串口故障 | 一次（重连） |
+| 8 | `E_PREEMPTED` | 被安全层/人工取消 | 否 |
+| 9 | `E_INVALID` | 参数/元素 ID 非法 | 否 |
+| 10 | `E_MAP_UNKNOWN` | 目标在未知区 | 换目标 |
+| 11 | `E_CANCELED` | 主动取消 | 否 |
+| 12 | `E_CONFIG` | 配置/版本不匹配 | 否 |
+
+错误码同时出现在 `ExecuteSkill` result 和 `/decide/events` 的 `code` 里；两边必须一致。
+
+---
+
+## 9. 时序
+
+### 9.1 开赛
+
+```
+manual/referee: /match/state=RUNNING, /match/clock=0
+  → world_state: clock_valid=true, phase=READY→OPENING
+  → decide_manager: DP0 已通过（启动时做过）
+  → 发 Plan(OPENING)
+  → skill_server: navigate(own_l1_near)
+  → Nav2: NavigateToPose
+  → 成功 → 元素状态 OWN → 下一个任务
+```
+
+### 9.2 定位丢失（最关键的异常路径）
+
+```
+/reloc_status: mode=SEARCHING（或超时）
+  → world_state: reloc_ok=false，reloc_age>1s
+  → safety_guard: veto=G2/G3
+  → 取消当前 skill（cancel_goal_async，等 result）
+  → 发零速（如后端支持）
+  → decide_manager: 进入 HOLD（不是 FAULT，先给 15 s 恢复）
+  → 恢复 TRACKING 且 diff 达标 → 重评估当前任务 → 继续/放弃
+  → 超过 15 s → FAULT，等待人工
+```
+
+### 9.3 177 s 收尾
+
+```
+match_clock: t=177
+  → safety_guard: veto=G7
+  → decide_manager: 不再产生新 Task
+  → 若当前 skill 是 ACT 且 deadline<179 → 允许完成
+  → 否则 cancel，进入 retreat（若时间够）
+  → t=179：取消全部、零速、置 release 标志
+```
+
+---
+
+## 10. 一致性检查清单
+
+对接完成前逐项打勾：
+
+- [ ] `ros2 interface show decide_msgs/action/ExecuteSkill` 与本文一致；
+- [ ] `ros2 topic hz /reloc_status` ≈ 2 Hz，解析器对 4 种 mode 都有单测；
+- [ ] 首次定位前（`mode=BOOTSTRAP`）发目标被拒绝，日志有 `G2`；
+- [ ] `mode` 消息停发 1.5 s 后，`reloc_ok=false`，当前技能被取消；
+- [ ] Nav2 `ABORTED` 映射到 `E_UNREACHABLE`，元素进入冷却；
+- [ ] MCU 后端下，目标到位判定用 TF，且稳定 0.2 s 才算成功；
+- [ ] `t=177.0` 之后没有新 goal；`t=179.0` 前所有 goal 已取消；
+- [ ] 同一份 JSONL 回放两次，`/decide/plan` 完全一致；
+- [ ] `field.yaml` 与 `prior_map.pcd` 哈希不匹配时，`field_server` 拒绝启动；
+- [ ] `motion_backend` 同时配成 `nav2` 和 `mcu_position` 时拒绝启动。

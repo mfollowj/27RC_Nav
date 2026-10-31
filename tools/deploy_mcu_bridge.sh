@@ -1,89 +1,81 @@
 #!/usr/bin/env bash
-# ============================================================================
-#  把本机的 mcu_bridge 包同步到机器人小电脑并编译
-# ============================================================================
-#  只同步 Nav/ros2_ws/src/mcu_bridge 这一个包，不动机器人上其它代码。
-#
-#  ★ 为什么要"保持原有的 prefix chain"：
-#     机器人上 Nav/ros2_ws/install/setup.bash 里 chain 了
-#     /home/rc/New_Nav/install、/home/rc/New_Nav/SCURC_Nav_Sim/install 等
-#     （这些不在 env.sh 里）。colcon build 会**重新生成**这个 setup.bash，
-#     如果编译时没 source 同样的前缀，它们就会从 chain 里消失，影响机器人上
-#     别的包。所以本脚本先从远端 setup.bash 里把现有 chain 抽出来，
-#     按同样顺序 source 之后再编译，并对比改动。
-#
-#  用法：
-#      ./tools/deploy_mcu_bridge.sh                    # 默认 192.168.10.10
-#      MCU_HOST=192.168.10.10 ./tools/deploy_mcu_bridge.sh
-#      ./tools/deploy_mcu_bridge.sh --no-build         # 只同步不编译
-# ============================================================================
+# 仅同步 MCU 包并编译，不启动节点；保留远端已有 underlay prefix chain。
+# MCU_HOST=192.168.10.10 MCU_USER=rc MCU_REPO=/home/rc/SCU27RC_Nav ./tools/deploy_mcu_bridge.sh
+# --no-build 只同步。首次整仓部署请使用根 build.sh。
 set -euo pipefail
 
 HOST="${MCU_HOST:-192.168.10.10}"
 USER_="${MCU_USER:-rc}"
 REMOTE_REPO="${MCU_REPO:-/home/rc/SCU27RC_Nav}"
-
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-LOCAL_PKG="${ROOT}/Nav/ros2_ws/src/mcu_bridge"
-REMOTE_PKG="${REMOTE_REPO}/Nav/ros2_ws/src/mcu_bridge"
-REMOTE_WS="${REMOTE_REPO}/Nav/ros2_ws"
-
+LOCAL_PKG="${ROOT}/src/mcu_bridge"
+REMOTE_PKG="${REMOTE_REPO}/src/mcu_bridge"
 BUILD=1
 for a in "$@"; do
-    [ "$a" = "--no-build" ] && BUILD=0
+    case "${a}" in
+        --no-build) BUILD=0 ;;
+        -h|--help)
+            echo '用法：MCU_HOST=<机器人地址> MCU_USER=rc MCU_REPO=<远端仓库路径> ./tools/deploy_mcu_bridge.sh [--no-build]'
+            exit 0 ;;
+        *) echo "未知参数：${a}" >&2; exit 2 ;;
+    esac
 done
 
-[ -d "${LOCAL_PKG}" ] || { echo "找不到 ${LOCAL_PKG}"; exit 1; }
-
 SSH=(ssh -o BatchMode=yes -o ConnectTimeout=15 "${USER_}@${HOST}")
+echo "[1/3] 同步 ${LOCAL_PKG}"
+printf -v REMOTE_CMD 'mkdir -p -- %q' "${REMOTE_PKG}"
+"${SSH[@]}" "${REMOTE_CMD}"
+rsync -az --delete --protect-args \
+    -e 'ssh -o BatchMode=yes -o ConnectTimeout=15' \
+    --exclude '__pycache__' --exclude '*.pyc' --exclude '.pytest_cache' \
+    "${LOCAL_PKG}/" "${USER_}@${HOST}:${REMOTE_PKG}/"
 
-echo "[1/4] 同步 ${LOCAL_PKG}"
-"${SSH[@]}" "mkdir -p '${REMOTE_PKG}'"
-rsync -az --delete \
-      --exclude '__pycache__' --exclude '*.pyc' --exclude '.pytest_cache' \
-      "${LOCAL_PKG}/" "${USER_}@${HOST}:${REMOTE_PKG}/"
-
-if [ "${BUILD}" = "0" ]; then
-    echo "[2/4] 跳过编译（--no-build）"
+if [ "${BUILD}" = 0 ]; then
+    echo '[2/3] 已跳过编译（--no-build）'
     exit 0
 fi
 
-echo "[2/4] 读取远端现有 prefix chain（编译后要原样保留）"
-CHAIN="$("${SSH[@]}" "cat '${REMOTE_WS}/install/setup.bash' 2>/dev/null" \
-    | python3 -c 'import re,sys
-t = sys.stdin.read()
-print(" ".join(p for p in re.findall(r"COLCON_CURRENT_PREFIX=\"([^\"]+)\"", t)
-              if p.startswith("/")))' || true)"
-echo "      chain: ${CHAIN:-<空>}"
-
-echo "[3/4] 远端编译"
-REMOTE_SCRIPT="$(cat <<EOF
+echo '[2/3] 在远端按原 prefix chain 编译'
+printf -v REMOTE_CMD 'bash -s -- %q' "${REMOTE_REPO}"
+"${SSH[@]}" "${REMOTE_CMD}" <<'REMOTE'
 set -e
+set -o pipefail
+repo="$1"
+workspace="${repo}"
+pkg="${workspace}/src/mcu_bridge"
+setup_file="${workspace}/install/setup.bash"
+
+read_chain() {
+    python3 - "$1" <<'PY'
+import pathlib
+import re
+import sys
+path = pathlib.Path(sys.argv[1])
+if path.is_file():
+    for prefix in re.findall(r'COLCON_CURRENT_PREFIX="([^"]+)"', path.read_text()):
+        if prefix.startswith('/'):
+            print(prefix)
+PY
+}
+mapfile -t chain < <(read_chain "${setup_file}")
+printf '原 prefix chain: %s\n' "${chain[@]}"
 source /opt/ros/humble/setup.bash
-for p in ${CHAIN}; do
-  if [ -f "\$p/setup.bash" ]; then source "\$p/setup.bash" >/dev/null 2>&1; fi
+for prefix in "${chain[@]}"; do
+    if [ -f "${prefix}/setup.bash" ]; then source "${prefix}/setup.bash"; fi
 done
-cp -a '${REMOTE_WS}/install/setup.bash' '/tmp/mcu_bridge_setup.bash.bak' 2>/dev/null || true
-cd '${REMOTE_WS}'
-colcon build --packages-select mcu_bridge
-source install/setup.bash
-echo ''
-echo '[4/4] 校验'
+if [ -f "${setup_file}" ]; then
+    cp -a "${setup_file}" /tmp/mcu_bridge_setup.bash.bak
+fi
+cd "${workspace}"
+colcon build --base-paths "${workspace}/src" --packages-select mcu_bridge
+source install/local_setup.bash
+
+echo '[3/3] 包路径与既有协议测试'
 ros2 pkg prefix mcu_bridge
-python3 '${REMOTE_PKG}/test/test_frame.py' | tail -2
-echo '--- 新的 chain（应与上面一致）---'
-grep -o 'COLCON_CURRENT_PREFIX="[^"]*"' install/setup.bash | sed 's/.*="//;s/"\$//'
-EOF
-)"
+python3 "${pkg}/test/test_frame.py"
+echo 'prefix chain 差异（原 setup 备份在 /tmp/mcu_bridge_setup.bash.bak）：'
+diff -u <(printf '%s\n' "${chain[@]}") <(read_chain "${setup_file}") || true
+REMOTE
 
-"${SSH[@]}" bash -s <<<"${REMOTE_SCRIPT}"
-
-echo
-echo "完成。机器人上的用法："
-echo "  ssh ${USER_}@${HOST}"
-echo "  source ${REMOTE_REPO}/env.sh"
-echo "  ros2 launch mcu_bridge mcu_bridge.launch.py dry_run:=true   # 先空跑看帧"
-echo "  ros2 launch mcu_bridge mcu_bridge.launch.py                 # 真发串口"
-echo
-echo "注意：/dev/ttyUSB0 同一时刻只能有一个写者。切换前先停掉 send_data："
-echo "  ssh ${USER_}@${HOST} 'pkill -f odom_serial_publisher'"
+echo "完成。机器人上 source \"${REMOTE_REPO}/env.sh\" 后，可先用 MCU_DRY_RUN=1 ./start_robot.sh 联调。"
+echo '串口必须只有一个写者；脚本没有启动驱动、串口桥或运动。'

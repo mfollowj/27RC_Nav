@@ -1,0 +1,58 @@
+<?xml version='1.0' encoding='utf-8'?>
+<sdf version="1.6">
+  <model name="cn_v3_draft_sky">
+    <static>false</static>
+    <link name="body">
+      <inertial>
+        <mass>0.22</mass>
+        <inertia>
+          <ixx>0.0014666666666666671</ixx>
+          <iyy>0.0014666666666666671</iyy>
+          <izz>0.0014666666666666671</izz>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyz>0</iyz>
+        </inertia>
+      </inertial>
+      <collision name="collision">
+        <geometry>
+          <box>
+            <size>0.2 0.2 0.2</size>
+          </box>
+        </geometry>
+        <surface>
+          <friction>
+            <ode>
+              <mu>0.6</mu>
+              <mu2>0.6</mu2>
+            </ode>
+          </friction>
+        </surface>
+      </collision>
+      <visual name="red_half">
+        <pose>0 0 0.05 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>.2 .2 .1</size>
+          </box>
+        </geometry>
+        <material>
+          <ambient>0.8745098039 0.1333333333 0.1333333333 1</ambient>
+          <diffuse>0.8745098039 0.1333333333 0.1333333333 1</diffuse>
+        </material>
+      </visual>
+      <visual name="blue_half">
+        <pose>0 0 -0.05 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>.2 .2 .1</size>
+          </box>
+        </geometry>
+        <material>
+          <ambient>0.1960784314 0 1 1</ambient>
+          <diffuse>0.1960784314 0 1 1</diffuse>
+        </material>
+      </visual>
+    </link>
+  </model>
+</sdf>

@@ -7,7 +7,8 @@
 ## 仓库在做什么
 
 - 导航主链：Mid-360 点云与 IMU → 抽稀 → FAST-LIVO2（无视觉模式）→ TEASER++／VGICP 重定位 → Nav2。
-- 仿真侧：Gazebo Classic 场地、四全向轮机器人和 Mid-360 插件；与真机共用 LIO 参数及重定位实现。
+- 导航仿真：Gazebo Classic 场地、omni4 四全向轮机器人和 Mid-360 插件；与真机共用 LIO 参数及重定位实现。
+- V3 双车场景：Fortress 中的 BR／TR `video_v2` 仿真原型，保留麦轮滚子、普通轮和机构；入口为 `./sim_robots.sh`。
 - 小机器人串口链：LIO 当前位姿与 RViz 目标点 → `mcu_bridge` → MCU。该入口由 MCU 执行位置闭环；Nav2 导航另由 `real_nav.sh` 启动。
 - `decision/`：现有 5 份设计文档，说明比赛阶段、任务、导航与机构接口；可运行的决策节点仍待实现。
 
@@ -28,9 +29,23 @@ archive/legacy_runs/    历史联调资料
 
 根目录是 colcon 工作区，`src/` 下有 `rc_field_nav`、`relocalization`、`ros2_livox_simulation` 和 `mcu_bridge`。本轮已实际迁移文件，保留包名与运行接口；目录与文件的旧新对照见 [命名与迁移](docs/naming.md)。
 
-## 第一次运行
+## 查看 V3 场地与 BR／TR
 
-目标系统为 **Ubuntu 22.04、ROS 2 Humble**；整车仿真使用 **Gazebo Classic 11**，真机模式不构建该仿真插件。还需 Nav2、PCL／Eigen／OpenCV／Sophus 和系统安装的 Livox-SDK2。第三方源码随仓库提供，构建产物安装到 `third_party/install`；系统依赖仍须单独安装。TEASER++ 首次构建会下载依赖，也可按 [Deps 说明](third_party/README.md) 提前准备本地源码。
+装有 **Ignition Gazebo 6.18（Fortress）** 的环境可从仓库根目录直接运行 `./sim_robots.sh`，无需编译 ROS 源码。场景组成是原有 54 个场地／道具模型加 2 台机器人，共 56 个模型。
+
+在现有 `rc27_nav` 容器中运行：
+
+```bash
+./sim_robots.sh --docker rc27_nav
+```
+
+该模式将场地与机器人资源复制到容器私有临时目录，前台运行，退出后清理，无需改变现有挂载。
+
+新入口使用独立 `IGN_PARTITION`，保留 `/br_v2`、`/tr_v2` 原生控制话题，默认不启 GPU Sensors，也不启动 ROS、LIO 或 Nav2。已在该容器实际读到 56 个模型并运行 1000 物理步，退出码 0；无界面运行使用 `./sim_robots.sh --docker rc27_nav -s --iterations 1000`。模型来源、控制与生成方法见 [机器人模型](simulation/robots/README.md)，初态及验证范围见 [地图与场地](docs/maps.md) 和 [当前状态](docs/status.md)。
+
+## 运行 ROS 导航：首次构建
+
+导航链面向 **Ubuntu 22.04、ROS 2 Humble**；omni4 导航仿真使用 **Gazebo Classic 11**，真机模式不构建该仿真插件。还需 Nav2、PCL／Eigen／OpenCV／Sophus 和系统安装的 Livox-SDK2。第三方源码随仓库提供，构建产物安装到 `third_party/install`；系统依赖仍须单独安装。TEASER++ 首次构建会下载依赖，也可按 [依赖说明](third_party/README.md) 提前准备本地源码。
 
 在目标机器的 `~/SCU27RC_Nav` 等 ASCII 路径获取源码并构建；跨机器、路径或 CPU 架构时重新编译，勿复制旧 `build/`、`install/` 作为部署方法。
 
@@ -58,6 +73,7 @@ source env.sh
 
 | 任务 | 命令 | 说明 |
 | --- | --- | --- |
+| V3 场地与 BR／TR | `./sim_robots.sh` | Fortress 独立场景，无需 ROS 构建 |
 | 机器人小电脑构建 | `JOBS=1 ./build.sh robot` | 构建依赖、重定位和串口包，跳过两个仿真包 |
 | 全量构建／只构建项目包 | `./build.sh`／`./build.sh nav` | 系统依赖准备好后执行 |
 | 仿真建图／导航 | `./sim_map.sh`／`./sim_nav.sh` | 导航需匹配的先验图 |

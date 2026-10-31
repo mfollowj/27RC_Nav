@@ -2,9 +2,44 @@
 
 仓库原有场地继续叫 `legacy`，新增 `cn_v3_draft` 可选场景，依据 2026-10-25 用户提供的国内 V3 征求意见稿。此次接入更新仿真场地资源和场景选择；现有 PCD、二维地图、LIO/Nav2 参数、外参与控制器参数没有改写。
 
-当前 Docker `rc27_nav` 中实际是 **Ignition Gazebo 6.18.0（Fortress）**；仓库现有机器人、雷达及 ROS 启动链使用 **Gazebo Classic 11** 插件。这两套运行环境需要区分：Fortress 已完成独立场地加载与物理步验证；Classic 版本完成了资源适配、构建安装及静态验证。
+当前 Docker `rc27_nav` 使用 **Ignition Gazebo 6.18.0（Fortress）**。V3 BR／TR 双车入口使用该环境；原 omni4 雷达与 ROS 导航链使用 **Gazebo Classic 11**。原有仅场地验证与本次双车验证分别记录。
 
-## 在现有 Docker 查看独立 V3 场地
+## 在现有 Docker 查看 V3 与 BR／TR
+
+从仓库根目录运行：
+
+```bash
+./sim_robots.sh --docker rc27_nav
+```
+
+`--docker` 将场地目录和 `simulation/robots` 复制到容器私有临时目录，前台运行后清理；当前容器只挂载旧目录也能使用。已有本机 Fortress 环境时直接运行 `./sim_robots.sh`，无需编译 ROS、SDK 或导航源码。
+
+无 GUI、有限步运行：
+
+```bash
+./sim_robots.sh --docker rc27_nav -s --iterations 10
+```
+
+该入口转调 `start_fortress_robots.sh`，加载 `worlds/robocon_cn_v3_draft_tr_br.world`，使用独立 `IGN_PARTITION`。场景初态组成是场地 1、红块 20、蓝块 20、塔顶 12、球 1，再加 BR／TR 两车，共 56 个模型。
+
+| 机器人 | 初始 x / y / z（米） | yaw | 模型特点 |
+| --- | --- | --- | --- |
+| TR | `-5.15 / -5.116825928 / 0.025100001` | `π/2` | 普通轮与机构 |
+| BR | `-4.35 / -5.166075008 / 0.030625772` | `π/2` | 显式麦轮滚子与机构 |
+
+初态沿用 V3 双启动区。模型来自队内视频启发重建的 `video_v2` 仿真原型，几何与机构用于原型仿真，并非实车 CAD；诊断中的 RGL／500 Hz BR 派生设置属于另一条实验链。
+
+控制保留 `/br_v2`、`/tr_v2` 原生 Ignition 话题。新入口默认不启 GPU Sensors，不启动 ROS、LIO 或 Nav2；发布 ROS `/cmd_vel` 不能直接驱动此场景。当前接入的验证进度见 [项目状态](status.md)。
+
+机器人模型、原生控制话题与生成源见 [simulation/robots/README.md](../simulation/robots/README.md)；双车初态和场景组合由 [generate_dual_robots.py](../simulation/worlds/cn_v3_draft/generate_dual_robots.py) 维护：
+
+```bash
+python3 simulation/worlds/cn_v3_draft/generate_dual_robots.py
+```
+
+修改生成源后重新生成，保留原模型的轮子、滚子、机构和控制话题，不单独修改生成 SDF。原有仅场地入口和下文 Classic omni4 导航入口继续使用各自的场景。
+
+## 仅查看 V3 场地与道具
 
 `simulation/worlds/cn_v3_draft/start_fortress_field.sh` 直接加载便携 Fortress 场地与 53 道具，不创建机器人，也不启动 LIO/Nav2。将该目录放入装有 Fortress 的容器后，在目录内运行：
 
@@ -33,7 +68,7 @@ V3 草案的内场为 11×11 m，地面顶世界 z=.025 m；L1/L2 顶为 .625/.9
 
 规则源名称明确带“征求意见稿”。PDF 内旧楼梯/足球表述与新修订条款存在冲突，模型按新专门条款及末页尺寸图处理；不将它写作正式 V3 比赛场地。
 
-## 选择场景与出生点
+## Classic omni4：选择场景与出生点
 
 按仓库现有构建流程重新安装 `rc_field_nav` 后：
 
@@ -88,7 +123,13 @@ python3 simulation/worlds/cn_v3_draft/generate_classic.py
 
 随后按原构建流程安装，检查资源解析、场地尺寸、道具初态和实际传感器输入，再重新采集匹配的 PCD / 栅格。生成文件不单独手改。旧场地用于复现实验时继续选 `field:=legacy`。
 
-## 本次验证范围（2026-10-31）
+## 双车验证（2026-10-31）
+
+实际执行 `./sim_robots.sh --docker rc27_nav -s --iterations 1000 -v3`，在独立 partition 运行 `robocon_cn_v3_draft_tr_br`，退出码 0，墙时 12.174 s。原生 SceneInfo 实际返回 56 个模型，包含 `robocon_br_video_v2` 与 `robocon_tr_video_v2`；两车的 MecanumDrive／DiffDrive 和真值插件均加载，原生 odom 初态与启动区一致。Ctrl-C 后本次 server 和私有临时目录均清理。
+
+本次默认未启 GPU Sensors，未运行 ROS、LIO 或 Nav2。1000 步证明短程物理更新与入口可执行；两车初态只作短窗观测，长时间稳定性、驱动运动与机构任务另测。日志与运行记录见 [项目状态](status.md)。
+
+## 先前仅场地与 Classic 资源验证（2026-10-31）
 
 已在实际 ROS 2 Humble / ament 环境完成 `rc_field_nav` 的独立 CMake configure、build、install；安装到临时前缀后，实际执行场景选择函数，验证 legacy 默认、V3 默认和用户 world/x/y 覆盖均生效。检查源目录与安装目录的 world / 模型 XML、全部包内 URI、97/79 计数、54 个模型初态及模板一致性，并在另一临时目录重新生成，生成内容逐文件一致。
 
@@ -98,4 +139,4 @@ python3 simulation/worlds/cn_v3_draft/generate_classic.py
 
 新增 `start_fortress_field.sh` 也已在另一独立 partition `scu27rc_v3_review_20261031_02` 实际执行 `-s --iterations 10`，退出码 0、无错误和自身进程组残留；此次没有启动 GUI。
 
-这证明当前 Docker 能真实加载便携 V3 场地并执行短程物理更新。本轮尚未完成 Classic server / GUI、机器人落稳、接触标定、雷达、LIO 或 Nav2 联动验证。场地从 Fortress 移植到 Classic 后仍需重新测量接触；10 步加载不代表道具长期稳定或整机能力。当前使用范围按地面调试处理，跨坡、跨层、携物和完整比赛决策需要各自的实际结果。
+这证明当前 Docker 能真实加载便携 V3 场地并执行短程物理更新。该次仅场地测试不覆盖机器人。Classic server / GUI、接触标定、雷达、LIO 或 Nav2 联动尚未完成；场地移植到 Classic 后仍需重新测量接触。10 步加载不代表道具长期稳定或整机能力，跨坡、跨层、携物和完整比赛决策需要各自的实际结果。

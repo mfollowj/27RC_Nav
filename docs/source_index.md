@@ -15,12 +15,16 @@
 
 `relocalization/src/` 只保留 `teaser_gicp_node`、`transform_publisher` 两个当前目标。旧 ICP、SAC-IA、small_gicp、TEASER 实现与旧 launch 已归入 [legacy](../src/relocalization/legacy/)，不参与默认构建或安装；使用说明见 [包 README](../src/relocalization/README.md)。
 
+Fortress 的 BR／TR 双车场景位于 `simulation/`，直接由 `./sim_robots.sh` 加载模型，不新增 ROS 包，也不经过上述 Classic 导航装配。
+
 ## 按修改任务定位
 
 | 想改什么 | 先改哪里 | 关联入口与验证 |
 | --- | --- | --- |
 | V3 场地几何、设施或出生点 | [地图与场地更新](maps.md) 指定的生成源；场地资产在 `simulation/worlds/` | 显式选场地，查看几何与出生点，再重建配套先验图 |
-| 机器人尺寸、轮径、质量、雷达安装 | [rc_field_nav/urdf](../src/rc_field_nav/urdf)；底盘实现 [omni_drive.py](../src/rc_field_nav/scripts/omni_drive.py) | 确认碰撞体、TF 与轮速方向；同步相应 Nav2 footprint |
+| Classic omni4 尺寸、轮径、质量、雷达安装 | [rc_field_nav/urdf](../src/rc_field_nav/urdf)；底盘实现 [omni_drive.py](../src/rc_field_nav/scripts/omni_drive.py) | 确认碰撞体、TF 与轮速方向；同步相应 Nav2 footprint |
+| Fortress BR／TR 原型的轮子、滚子与机构 | [机器人模型说明](../simulation/robots/README.md)、[source](../simulation/robots/source/) | 修改生成源后运行 `generate_models.py`；保留原生控制话题 |
+| Fortress 双车出生点与场景组合 | [generate_dual_robots.py](../simulation/worlds/cn_v3_draft/generate_dual_robots.py) | 重新生成双车 world，再用 `./sim_robots.sh` 检查初态 |
 | 真机 LiDAR–IMU 标定、LIO 滤波与地图参数 | [config/livo_mid360.yaml](../config/livo_mid360.yaml) | real／sim 共用；平台差异由各 launch 覆盖 |
 | 雷达网络与发布配置 | [mid360_config.json](../robot/config/mid360_config.json)、[real_livox_driver.launch.py](../robot/launch/real_livox_driver.launch.py) | `host_ip`／`lidar_ip` 可覆盖，运行 `check_lidar.sh` 看真实数据 |
 | 点云抽稀、距离与高度过滤 | [livox_preprocess.py](../robot/scripts/livox_preprocess.py)，以及调用它的 launch 参数 | 检查原始／过滤话题频率与保留点数 |
@@ -36,6 +40,7 @@
 
 | 根脚本 | 主要装配文件 | 作用 |
 | --- | --- | --- |
+| [sim_robots.sh](../sim_robots.sh) | [start_fortress_robots.sh](../simulation/worlds/cn_v3_draft/start_fortress_robots.sh) → [双车 world](../simulation/worlds/cn_v3_draft/worlds/robocon_cn_v3_draft_tr_br.world) | Fortress V3 场地、53 道具与 BR／TR；`--docker rc27_nav` 使用现有容器，不启动 ROS 导航 |
 | [sim_map.sh](../sim_map.sh) | [sim_mapping.launch.py](../src/rc_field_nav/launch/sim_mapping.launch.py) → [sim.launch.py](../src/rc_field_nav/launch/sim.launch.py) | 场地、机器人、传感器、LIO 与建图 |
 | [sim_nav.sh](../sim_nav.sh) | [sim_navigation.launch.py](../src/rc_field_nav/launch/sim_navigation.launch.py) → [nav2_only.launch.py](../src/rc_field_nav/launch/nav2_only.launch.py) | 先验图定位、LIO、Nav2；有重定位实现选择 |
 | [real_map.sh](../real_map.sh) | [real_mapping.launch.py](../robot/launch/real_mapping.launch.py) | 雷达、点云处理、LIO、轨迹与点云累积 |
@@ -46,6 +51,8 @@
 真机与仿真都加载 [livo_mid360.yaml](../config/livo_mid360.yaml) 和 [camera_pinhole.yaml](../config/camera_pinhole.yaml)。当前 `img_en=0`，相机文件用于参数声明。仿真的 LiDAR–IMU 外参和 `use_sim_time` 在 launch 中覆盖，调仿真时先查覆盖值。
 
 ## 机器人与传感器参数
+
+以下为原 Classic omni4 导航模型。Fortress BR／TR 的 `video_v2` 模型、原生 `/br_v2`／`/tr_v2` 控制话题和生成方法见 [simulation/robots/README.md](../simulation/robots/README.md)；新入口默认不启 GPU Sensors，也不创建 ROS bridge。
 
 - [omni4_body.xacro](../src/rc_field_nav/urdf/omni4_body.xacro)：车体、轮子、质量与碰撞几何。
 - [omni4_field.urdf.xacro](../src/rc_field_nav/urdf/omni4_field.urdf.xacro)：机器人组合、传感器安装与 Gazebo 接入。

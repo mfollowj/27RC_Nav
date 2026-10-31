@@ -1,0 +1,2434 @@
+<?xml version='1.0' encoding='utf-8'?>
+<robot name="robocon_br_proto">
+  <link name="base_footprint" />
+  <link name="base_link">
+    <inertial>
+      <origin xyz="0 0 0" />
+      <mass value="16" />
+      <inertia ixx="0.4" ixy="0" ixz="0" iyy="0.4" iyz="0" izz="0.58" />
+    </inertial>
+    <visual>
+      <geometry>
+        <box size="0.54 0.50 0.12" />
+      </geometry>
+      <material name="chassis">
+        <color rgba="0.75 0.59 0.20 1" />
+      </material>
+    </visual>
+    <collision>
+      <geometry>
+        <box size="0.54 0.50 0.12" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="base_mount_joint" type="fixed">
+    <parent link="base_footprint" />
+    <child link="base_link" />
+    <origin xyz="0 0 0.22" />
+  </joint>
+  <link name="front_left_wheel">
+    <inertial>
+      <origin xyz="0 0 0" />
+      <mass value="0.34" />
+      <inertia ixx="0.0007103733333333334" ixy="0" ixz="0" iyy="0.00114308" iyz="0" izz="0.0007103733333333334" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="1.57079632679 0 0" />
+      <geometry>
+        <cylinder radius="0.082" length="0.07" />
+      </geometry>
+      <material name="front_left_wheel_mat">
+        <color rgba="0.12 0.12 0.14 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="1.57079632679 0 0" />
+      <geometry>
+        <cylinder radius="0.082" length="0.07" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="front_left_wheel_drive_joint" type="continuous">
+    <parent link="base_link" />
+    <child link="front_left_wheel" />
+    <origin xyz="0.2 0.22 -0.10" />
+    <axis xyz="0 1 0" />
+    <limit effort="18" velocity="15" />
+    <dynamics damping="0.04" friction="0.02" />
+  </joint>
+  <gazebo reference="front_left_wheel">
+    <mu1>0.5</mu1>
+    <mu2>0.5</mu2>
+    <kp>100000</kp>
+    <kd>8</kd>
+    <maxVel>0.5</maxVel>
+    <minDepth>0.001</minDepth>
+  </gazebo>
+  <link name="front_left_wheel_roller_00">
+    <inertial>
+      <origin xyz="0 0 0" />
+      <mass value="0.025" />
+      <inertia ixx="3.035833333333334e-05" ixy="0" ixz="0" iyy="3.035833333333334e-05" iyz="0" izz="8.449999999999999e-06" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.026" length="0.112" />
+      </geometry>
+      <material name="front_left_wheel_roller_00_mat">
+        <color rgba="0.16 0.16 0.18 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.026" length="0.112" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="front_left_wheel_roller_00_spin_joint" type="continuous">
+    <parent link="front_left_wheel" />
+    <child link="front_left_wheel_roller_00" />
+    <origin xyz="0.094000 0 0.000000" rpy="0.000000000 0.785398000 -1.570796000" />
+    <axis xyz="0 0 1" />
+    <limit effort="1.5" velocity="20" />
+    <dynamics damping="0.015" friction="0.01" />
+  </joint>
+  <gazebo reference="front_left_wheel_roller_00">
+    <mu1>0.8</mu1>
+    <mu2>0.8</mu2>
+    <kp>100000</kp>
+    <kd>8</kd>
+    <maxVel>0.5</maxVel>
+    <minDepth>0.001</minDepth>
+  </gazebo>
+  <link name="front_left_wheel_roller_01">
+    <inertial>
+      <origin xyz="0 0 0" />
+      <mass value="0.025" />
+      <inertia ixx="3.035833333333334e-05" ixy="0" ixz="0" iyy="3.035833333333334e-05" iyz="0" izz="8.449999999999999e-06" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.026" length="0.112" />
+      </geometry>
+      <material name="front_left_wheel_roller_01_mat">
+        <color rgba="0.16 0.16 0.18 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.026" length="0.112" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="front_left_wheel_roller_01_spin_joint" type="continuous">
+    <parent link="front_left_wheel" />
+    <child link="front_left_wheel_roller_01" />
+    <origin xyz="0.081406 0 0.047000" rpy="0.000000000 0.911738000 -2.034444000" />
+    <axis xyz="0 0 1" />
+    <limit effort="1.5" velocity="20" />
+    <dynamics damping="0.015" friction="0.01" />
+  </joint>
+  <gazebo reference="front_left_wheel_roller_01">
+    <mu1>0.8</mu1>
+    <mu2>0.8</mu2>
+    <kp>100000</kp>
+    <kd>8</kd>
+    <maxVel>0.5</maxVel>
+    <minDepth>0.001</minDepth>
+  </gazebo>
+  <link name="front_left_wheel_roller_02">
+    <inertial>
+      <origin xyz="0 0 0" />
+      <mass value="0.025" />
+      <inertia ixx="3.035833333333334e-05" ixy="0" ixz="0" iyy="3.035833333333334e-05" iyz="0" izz="8.449999999999999e-06" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.026" length="0.112" />
+      </geometry>
+      <material name="front_left_wheel_roller_02_mat">
+        <color rgba="0.16 0.16 0.18 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.026" length="0.112" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="front_left_wheel_roller_02_spin_joint" type="continuous">
+    <parent link="front_left_wheel" />
+    <child link="front_left_wheel_roller_02" />
+    <origin xyz="0.047000 0 0.081406" rpy="0.000000000 1.209429000 -2.284521000" />
+    <axis xyz="0 0 1" />
+    <limit effort="1.5" velocity="20" />
+    <dynamics damping="0.015" friction="0.01" />
+  </joint>
+  <gazebo reference="front_left_wheel_roller_02">
+    <mu1>0.8</mu1>
+    <mu2>0.8</mu2>
+    <kp>100000</kp>
+    <kd>8</kd>
+    <maxVel>0.5</maxVel>
+    <minDepth>0.001</minDepth>
+  </gazebo>
+  <link name="front_left_wheel_roller_03">
+    <inertial>
+      <origin xyz="0 0 0" />
+      <mass value="0.025" />
+      <inertia ixx="3.035833333333334e-05" ixy="0" ixz="0" iyy="3.035833333333334e-05" iyz="0" izz="8.449999999999999e-06" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.026" length="0.112" />
+      </geometry>
+      <material name="front_left_wheel_roller_03_mat">
+        <color rgba="0.16 0.16 0.18 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.026" length="0.112" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="front_left_wheel_roller_03_spin_joint" type="continuous">
+    <parent link="front_left_wheel" />
+    <child link="front_left_wheel_roller_03" />
+    <origin xyz="0.000000 0 0.094000" rpy="0.000000000 1.570796000 -2.356194000" />
+    <axis xyz="0 0 1" />
+    <limit effort="1.5" velocity="20" />
+    <dynamics damping="0.015" friction="0.01" />
+  </joint>
+  <gazebo reference="front_left_wheel_roller_03">
+    <mu1>0.8</mu1>
+    <mu2>0.8</mu2>
+    <kp>100000</kp>
+    <kd>8</kd>
+    <maxVel>0.5</maxVel>
+    <minDepth>0.001</minDepth>
+  </gazebo>
+  <link name="front_left_wheel_roller_04">
+    <inertial>
+      <origin xyz="0 0 0" />
+      <mass value="0.025" />
+      <inertia ixx="3.035833333333334e-05" ixy="0" ixz="0" iyy="3.035833333333334e-05" iyz="0" izz="8.449999999999999e-06" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.026" length="0.112" />
+      </geometry>
+      <material name="front_left_wheel_roller_04_mat">
+        <color rgba="0.16 0.16 0.18 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.026" length="0.112" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="front_left_wheel_roller_04_spin_joint" type="continuous">
+    <parent link="front_left_wheel" />
+    <child link="front_left_wheel_roller_04" />
+    <origin xyz="-0.047000 0 0.081406" rpy="0.000000000 1.932163000 -2.284521000" />
+    <axis xyz="0 0 1" />
+    <limit effort="1.5" velocity="20" />
+    <dynamics damping="0.015" friction="0.01" />
+  </joint>
+  <gazebo reference="front_left_wheel_roller_04">
+    <mu1>0.8</mu1>
+    <mu2>0.8</mu2>
+    <kp>100000</kp>
+    <kd>8</kd>
+    <maxVel>0.5</maxVel>
+    <minDepth>0.001</minDepth>
+  </gazebo>
+  <link name="front_left_wheel_roller_05">
+    <inertial>
+      <origin xyz="0 0 0" />
+      <mass value="0.025" />
+      <inertia ixx="3.035833333333334e-05" ixy="0" ixz="0" iyy="3.035833333333334e-05" iyz="0" izz="8.449999999999999e-06" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.026" length="0.112" />
+      </geometry>
+      <material name="front_left_wheel_roller_05_mat">
+        <color rgba="0.16 0.16 0.18 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.026" length="0.112" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="front_left_wheel_roller_05_spin_joint" type="continuous">
+    <parent link="front_left_wheel" />
+    <child link="front_left_wheel_roller_05" />
+    <origin xyz="-0.081406 0 0.047000" rpy="0.000000000 2.229854000 -2.034444000" />
+    <axis xyz="0 0 1" />
+    <limit effort="1.5" velocity="20" />
+    <dynamics damping="0.015" friction="0.01" />
+  </joint>
+  <gazebo reference="front_left_wheel_roller_05">
+    <mu1>0.8</mu1>
+    <mu2>0.8</mu2>
+    <kp>100000</kp>
+    <kd>8</kd>
+    <maxVel>0.5</maxVel>
+    <minDepth>0.001</minDepth>
+  </gazebo>
+  <link name="front_left_wheel_roller_06">
+    <inertial>
+      <origin xyz="0 0 0" />
+      <mass value="0.025" />
+      <inertia ixx="3.035833333333334e-05" ixy="0" ixz="0" iyy="3.035833333333334e-05" iyz="0" izz="8.449999999999999e-06" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.026" length="0.112" />
+      </geometry>
+      <material name="front_left_wheel_roller_06_mat">
+        <color rgba="0.16 0.16 0.18 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.026" length="0.112" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="front_left_wheel_roller_06_spin_joint" type="continuous">
+    <parent link="front_left_wheel" />
+    <child link="front_left_wheel_roller_06" />
+    <origin xyz="-0.094000 0 0.000000" rpy="0.000000000 2.356194000 -1.570796000" />
+    <axis xyz="0 0 1" />
+    <limit effort="1.5" velocity="20" />
+    <dynamics damping="0.015" friction="0.01" />
+  </joint>
+  <gazebo reference="front_left_wheel_roller_06">
+    <mu1>0.8</mu1>
+    <mu2>0.8</mu2>
+    <kp>100000</kp>
+    <kd>8</kd>
+    <maxVel>0.5</maxVel>
+    <minDepth>0.001</minDepth>
+  </gazebo>
+  <link name="front_left_wheel_roller_07">
+    <inertial>
+      <origin xyz="0 0 0" />
+      <mass value="0.025" />
+      <inertia ixx="3.035833333333334e-05" ixy="0" ixz="0" iyy="3.035833333333334e-05" iyz="0" izz="8.449999999999999e-06" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.026" length="0.112" />
+      </geometry>
+      <material name="front_left_wheel_roller_07_mat">
+        <color rgba="0.16 0.16 0.18 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.026" length="0.112" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="front_left_wheel_roller_07_spin_joint" type="continuous">
+    <parent link="front_left_wheel" />
+    <child link="front_left_wheel_roller_07" />
+    <origin xyz="-0.081406 0 -0.047000" rpy="0.000000000 2.229854000 -1.107149000" />
+    <axis xyz="0 0 1" />
+    <limit effort="1.5" velocity="20" />
+    <dynamics damping="0.015" friction="0.01" />
+  </joint>
+  <gazebo reference="front_left_wheel_roller_07">
+    <mu1>0.8</mu1>
+    <mu2>0.8</mu2>
+    <kp>100000</kp>
+    <kd>8</kd>
+    <maxVel>0.5</maxVel>
+    <minDepth>0.001</minDepth>
+  </gazebo>
+  <link name="front_left_wheel_roller_08">
+    <inertial>
+      <origin xyz="0 0 0" />
+      <mass value="0.025" />
+      <inertia ixx="3.035833333333334e-05" ixy="0" ixz="0" iyy="3.035833333333334e-05" iyz="0" izz="8.449999999999999e-06" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.026" length="0.112" />
+      </geometry>
+      <material name="front_left_wheel_roller_08_mat">
+        <color rgba="0.16 0.16 0.18 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.026" length="0.112" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="front_left_wheel_roller_08_spin_joint" type="continuous">
+    <parent link="front_left_wheel" />
+    <child link="front_left_wheel_roller_08" />
+    <origin xyz="-0.047000 0 -0.081406" rpy="0.000000000 1.932163000 -0.857072000" />
+    <axis xyz="0 0 1" />
+    <limit effort="1.5" velocity="20" />
+    <dynamics damping="0.015" friction="0.01" />
+  </joint>
+  <gazebo reference="front_left_wheel_roller_08">
+    <mu1>0.8</mu1>
+    <mu2>0.8</mu2>
+    <kp>100000</kp>
+    <kd>8</kd>
+    <maxVel>0.5</maxVel>
+    <minDepth>0.001</minDepth>
+  </gazebo>
+  <link name="front_left_wheel_roller_09">
+    <inertial>
+      <origin xyz="0 0 0" />
+      <mass value="0.025" />
+      <inertia ixx="3.035833333333334e-05" ixy="0" ixz="0" iyy="3.035833333333334e-05" iyz="0" izz="8.449999999999999e-06" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.026" length="0.112" />
+      </geometry>
+      <material name="front_left_wheel_roller_09_mat">
+        <color rgba="0.16 0.16 0.18 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.026" length="0.112" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="front_left_wheel_roller_09_spin_joint" type="continuous">
+    <parent link="front_left_wheel" />
+    <child link="front_left_wheel_roller_09" />
+    <origin xyz="-0.000000 0 -0.094000" rpy="0.000000000 1.570796000 -0.785398000" />
+    <axis xyz="0 0 1" />
+    <limit effort="1.5" velocity="20" />
+    <dynamics damping="0.015" friction="0.01" />
+  </joint>
+  <gazebo reference="front_left_wheel_roller_09">
+    <mu1>0.8</mu1>
+    <mu2>0.8</mu2>
+    <kp>100000</kp>
+    <kd>8</kd>
+    <maxVel>0.5</maxVel>
+    <minDepth>0.001</minDepth>
+  </gazebo>
+  <link name="front_left_wheel_roller_10">
+    <inertial>
+      <origin xyz="0 0 0" />
+      <mass value="0.025" />
+      <inertia ixx="3.035833333333334e-05" ixy="0" ixz="0" iyy="3.035833333333334e-05" iyz="0" izz="8.449999999999999e-06" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.026" length="0.112" />
+      </geometry>
+      <material name="front_left_wheel_roller_10_mat">
+        <color rgba="0.16 0.16 0.18 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.026" length="0.112" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="front_left_wheel_roller_10_spin_joint" type="continuous">
+    <parent link="front_left_wheel" />
+    <child link="front_left_wheel_roller_10" />
+    <origin xyz="0.047000 0 -0.081406" rpy="0.000000000 1.209429000 -0.857072000" />
+    <axis xyz="0 0 1" />
+    <limit effort="1.5" velocity="20" />
+    <dynamics damping="0.015" friction="0.01" />
+  </joint>
+  <gazebo reference="front_left_wheel_roller_10">
+    <mu1>0.8</mu1>
+    <mu2>0.8</mu2>
+    <kp>100000</kp>
+    <kd>8</kd>
+    <maxVel>0.5</maxVel>
+    <minDepth>0.001</minDepth>
+  </gazebo>
+  <link name="front_left_wheel_roller_11">
+    <inertial>
+      <origin xyz="0 0 0" />
+      <mass value="0.025" />
+      <inertia ixx="3.035833333333334e-05" ixy="0" ixz="0" iyy="3.035833333333334e-05" iyz="0" izz="8.449999999999999e-06" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.026" length="0.112" />
+      </geometry>
+      <material name="front_left_wheel_roller_11_mat">
+        <color rgba="0.16 0.16 0.18 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.026" length="0.112" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="front_left_wheel_roller_11_spin_joint" type="continuous">
+    <parent link="front_left_wheel" />
+    <child link="front_left_wheel_roller_11" />
+    <origin xyz="0.081406 0 -0.047000" rpy="0.000000000 0.911738000 -1.107149000" />
+    <axis xyz="0 0 1" />
+    <limit effort="1.5" velocity="20" />
+    <dynamics damping="0.015" friction="0.01" />
+  </joint>
+  <gazebo reference="front_left_wheel_roller_11">
+    <mu1>0.8</mu1>
+    <mu2>0.8</mu2>
+    <kp>100000</kp>
+    <kd>8</kd>
+    <maxVel>0.5</maxVel>
+    <minDepth>0.001</minDepth>
+  </gazebo>
+  <link name="front_right_wheel">
+    <inertial>
+      <origin xyz="0 0 0" />
+      <mass value="0.34" />
+      <inertia ixx="0.0007103733333333334" ixy="0" ixz="0" iyy="0.00114308" iyz="0" izz="0.0007103733333333334" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="1.57079632679 0 0" />
+      <geometry>
+        <cylinder radius="0.082" length="0.07" />
+      </geometry>
+      <material name="front_right_wheel_mat">
+        <color rgba="0.12 0.12 0.14 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="1.57079632679 0 0" />
+      <geometry>
+        <cylinder radius="0.082" length="0.07" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="front_right_wheel_drive_joint" type="continuous">
+    <parent link="base_link" />
+    <child link="front_right_wheel" />
+    <origin xyz="0.2 -0.22 -0.10" />
+    <axis xyz="0 1 0" />
+    <limit effort="18" velocity="15" />
+    <dynamics damping="0.04" friction="0.02" />
+  </joint>
+  <gazebo reference="front_right_wheel">
+    <mu1>0.5</mu1>
+    <mu2>0.5</mu2>
+    <kp>100000</kp>
+    <kd>8</kd>
+    <maxVel>0.5</maxVel>
+    <minDepth>0.001</minDepth>
+  </gazebo>
+  <link name="front_right_wheel_roller_00">
+    <inertial>
+      <origin xyz="0 0 0" />
+      <mass value="0.025" />
+      <inertia ixx="3.035833333333334e-05" ixy="0" ixz="0" iyy="3.035833333333334e-05" iyz="0" izz="8.449999999999999e-06" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.026" length="0.112" />
+      </geometry>
+      <material name="front_right_wheel_roller_00_mat">
+        <color rgba="0.16 0.16 0.18 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.026" length="0.112" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="front_right_wheel_roller_00_spin_joint" type="continuous">
+    <parent link="front_right_wheel" />
+    <child link="front_right_wheel_roller_00" />
+    <origin xyz="0.094000 0 0.000000" rpy="0.000000000 0.785398000 1.570796000" />
+    <axis xyz="0 0 1" />
+    <limit effort="1.5" velocity="20" />
+    <dynamics damping="0.015" friction="0.01" />
+  </joint>
+  <gazebo reference="front_right_wheel_roller_00">
+    <mu1>0.8</mu1>
+    <mu2>0.8</mu2>
+    <kp>100000</kp>
+    <kd>8</kd>
+    <maxVel>0.5</maxVel>
+    <minDepth>0.001</minDepth>
+  </gazebo>
+  <link name="front_right_wheel_roller_01">
+    <inertial>
+      <origin xyz="0 0 0" />
+      <mass value="0.025" />
+      <inertia ixx="3.035833333333334e-05" ixy="0" ixz="0" iyy="3.035833333333334e-05" iyz="0" izz="8.449999999999999e-06" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.026" length="0.112" />
+      </geometry>
+      <material name="front_right_wheel_roller_01_mat">
+        <color rgba="0.16 0.16 0.18 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.026" length="0.112" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="front_right_wheel_roller_01_spin_joint" type="continuous">
+    <parent link="front_right_wheel" />
+    <child link="front_right_wheel_roller_01" />
+    <origin xyz="0.081406 0 0.047000" rpy="0.000000000 0.911738000 2.034444000" />
+    <axis xyz="0 0 1" />
+    <limit effort="1.5" velocity="20" />
+    <dynamics damping="0.015" friction="0.01" />
+  </joint>
+  <gazebo reference="front_right_wheel_roller_01">
+    <mu1>0.8</mu1>
+    <mu2>0.8</mu2>
+    <kp>100000</kp>
+    <kd>8</kd>
+    <maxVel>0.5</maxVel>
+    <minDepth>0.001</minDepth>
+  </gazebo>
+  <link name="front_right_wheel_roller_02">
+    <inertial>
+      <origin xyz="0 0 0" />
+      <mass value="0.025" />
+      <inertia ixx="3.035833333333334e-05" ixy="0" ixz="0" iyy="3.035833333333334e-05" iyz="0" izz="8.449999999999999e-06" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.026" length="0.112" />
+      </geometry>
+      <material name="front_right_wheel_roller_02_mat">
+        <color rgba="0.16 0.16 0.18 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.026" length="0.112" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="front_right_wheel_roller_02_spin_joint" type="continuous">
+    <parent link="front_right_wheel" />
+    <child link="front_right_wheel_roller_02" />
+    <origin xyz="0.047000 0 0.081406" rpy="0.000000000 1.209429000 2.284521000" />
+    <axis xyz="0 0 1" />
+    <limit effort="1.5" velocity="20" />
+    <dynamics damping="0.015" friction="0.01" />
+  </joint>
+  <gazebo reference="front_right_wheel_roller_02">
+    <mu1>0.8</mu1>
+    <mu2>0.8</mu2>
+    <kp>100000</kp>
+    <kd>8</kd>
+    <maxVel>0.5</maxVel>
+    <minDepth>0.001</minDepth>
+  </gazebo>
+  <link name="front_right_wheel_roller_03">
+    <inertial>
+      <origin xyz="0 0 0" />
+      <mass value="0.025" />
+      <inertia ixx="3.035833333333334e-05" ixy="0" ixz="0" iyy="3.035833333333334e-05" iyz="0" izz="8.449999999999999e-06" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.026" length="0.112" />
+      </geometry>
+      <material name="front_right_wheel_roller_03_mat">
+        <color rgba="0.16 0.16 0.18 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.026" length="0.112" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="front_right_wheel_roller_03_spin_joint" type="continuous">
+    <parent link="front_right_wheel" />
+    <child link="front_right_wheel_roller_03" />
+    <origin xyz="0.000000 0 0.094000" rpy="0.000000000 1.570796000 2.356194000" />
+    <axis xyz="0 0 1" />
+    <limit effort="1.5" velocity="20" />
+    <dynamics damping="0.015" friction="0.01" />
+  </joint>
+  <gazebo reference="front_right_wheel_roller_03">
+    <mu1>0.8</mu1>
+    <mu2>0.8</mu2>
+    <kp>100000</kp>
+    <kd>8</kd>
+    <maxVel>0.5</maxVel>
+    <minDepth>0.001</minDepth>
+  </gazebo>
+  <link name="front_right_wheel_roller_04">
+    <inertial>
+      <origin xyz="0 0 0" />
+      <mass value="0.025" />
+      <inertia ixx="3.035833333333334e-05" ixy="0" ixz="0" iyy="3.035833333333334e-05" iyz="0" izz="8.449999999999999e-06" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.026" length="0.112" />
+      </geometry>
+      <material name="front_right_wheel_roller_04_mat">
+        <color rgba="0.16 0.16 0.18 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.026" length="0.112" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="front_right_wheel_roller_04_spin_joint" type="continuous">
+    <parent link="front_right_wheel" />
+    <child link="front_right_wheel_roller_04" />
+    <origin xyz="-0.047000 0 0.081406" rpy="0.000000000 1.932163000 2.284521000" />
+    <axis xyz="0 0 1" />
+    <limit effort="1.5" velocity="20" />
+    <dynamics damping="0.015" friction="0.01" />
+  </joint>
+  <gazebo reference="front_right_wheel_roller_04">
+    <mu1>0.8</mu1>
+    <mu2>0.8</mu2>
+    <kp>100000</kp>
+    <kd>8</kd>
+    <maxVel>0.5</maxVel>
+    <minDepth>0.001</minDepth>
+  </gazebo>
+  <link name="front_right_wheel_roller_05">
+    <inertial>
+      <origin xyz="0 0 0" />
+      <mass value="0.025" />
+      <inertia ixx="3.035833333333334e-05" ixy="0" ixz="0" iyy="3.035833333333334e-05" iyz="0" izz="8.449999999999999e-06" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.026" length="0.112" />
+      </geometry>
+      <material name="front_right_wheel_roller_05_mat">
+        <color rgba="0.16 0.16 0.18 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.026" length="0.112" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="front_right_wheel_roller_05_spin_joint" type="continuous">
+    <parent link="front_right_wheel" />
+    <child link="front_right_wheel_roller_05" />
+    <origin xyz="-0.081406 0 0.047000" rpy="0.000000000 2.229854000 2.034444000" />
+    <axis xyz="0 0 1" />
+    <limit effort="1.5" velocity="20" />
+    <dynamics damping="0.015" friction="0.01" />
+  </joint>
+  <gazebo reference="front_right_wheel_roller_05">
+    <mu1>0.8</mu1>
+    <mu2>0.8</mu2>
+    <kp>100000</kp>
+    <kd>8</kd>
+    <maxVel>0.5</maxVel>
+    <minDepth>0.001</minDepth>
+  </gazebo>
+  <link name="front_right_wheel_roller_06">
+    <inertial>
+      <origin xyz="0 0 0" />
+      <mass value="0.025" />
+      <inertia ixx="3.035833333333334e-05" ixy="0" ixz="0" iyy="3.035833333333334e-05" iyz="0" izz="8.449999999999999e-06" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.026" length="0.112" />
+      </geometry>
+      <material name="front_right_wheel_roller_06_mat">
+        <color rgba="0.16 0.16 0.18 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.026" length="0.112" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="front_right_wheel_roller_06_spin_joint" type="continuous">
+    <parent link="front_right_wheel" />
+    <child link="front_right_wheel_roller_06" />
+    <origin xyz="-0.094000 0 0.000000" rpy="0.000000000 2.356194000 1.570796000" />
+    <axis xyz="0 0 1" />
+    <limit effort="1.5" velocity="20" />
+    <dynamics damping="0.015" friction="0.01" />
+  </joint>
+  <gazebo reference="front_right_wheel_roller_06">
+    <mu1>0.8</mu1>
+    <mu2>0.8</mu2>
+    <kp>100000</kp>
+    <kd>8</kd>
+    <maxVel>0.5</maxVel>
+    <minDepth>0.001</minDepth>
+  </gazebo>
+  <link name="front_right_wheel_roller_07">
+    <inertial>
+      <origin xyz="0 0 0" />
+      <mass value="0.025" />
+      <inertia ixx="3.035833333333334e-05" ixy="0" ixz="0" iyy="3.035833333333334e-05" iyz="0" izz="8.449999999999999e-06" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.026" length="0.112" />
+      </geometry>
+      <material name="front_right_wheel_roller_07_mat">
+        <color rgba="0.16 0.16 0.18 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.026" length="0.112" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="front_right_wheel_roller_07_spin_joint" type="continuous">
+    <parent link="front_right_wheel" />
+    <child link="front_right_wheel_roller_07" />
+    <origin xyz="-0.081406 0 -0.047000" rpy="0.000000000 2.229854000 1.107149000" />
+    <axis xyz="0 0 1" />
+    <limit effort="1.5" velocity="20" />
+    <dynamics damping="0.015" friction="0.01" />
+  </joint>
+  <gazebo reference="front_right_wheel_roller_07">
+    <mu1>0.8</mu1>
+    <mu2>0.8</mu2>
+    <kp>100000</kp>
+    <kd>8</kd>
+    <maxVel>0.5</maxVel>
+    <minDepth>0.001</minDepth>
+  </gazebo>
+  <link name="front_right_wheel_roller_08">
+    <inertial>
+      <origin xyz="0 0 0" />
+      <mass value="0.025" />
+      <inertia ixx="3.035833333333334e-05" ixy="0" ixz="0" iyy="3.035833333333334e-05" iyz="0" izz="8.449999999999999e-06" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.026" length="0.112" />
+      </geometry>
+      <material name="front_right_wheel_roller_08_mat">
+        <color rgba="0.16 0.16 0.18 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.026" length="0.112" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="front_right_wheel_roller_08_spin_joint" type="continuous">
+    <parent link="front_right_wheel" />
+    <child link="front_right_wheel_roller_08" />
+    <origin xyz="-0.047000 0 -0.081406" rpy="0.000000000 1.932163000 0.857072000" />
+    <axis xyz="0 0 1" />
+    <limit effort="1.5" velocity="20" />
+    <dynamics damping="0.015" friction="0.01" />
+  </joint>
+  <gazebo reference="front_right_wheel_roller_08">
+    <mu1>0.8</mu1>
+    <mu2>0.8</mu2>
+    <kp>100000</kp>
+    <kd>8</kd>
+    <maxVel>0.5</maxVel>
+    <minDepth>0.001</minDepth>
+  </gazebo>
+  <link name="front_right_wheel_roller_09">
+    <inertial>
+      <origin xyz="0 0 0" />
+      <mass value="0.025" />
+      <inertia ixx="3.035833333333334e-05" ixy="0" ixz="0" iyy="3.035833333333334e-05" iyz="0" izz="8.449999999999999e-06" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.026" length="0.112" />
+      </geometry>
+      <material name="front_right_wheel_roller_09_mat">
+        <color rgba="0.16 0.16 0.18 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.026" length="0.112" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="front_right_wheel_roller_09_spin_joint" type="continuous">
+    <parent link="front_right_wheel" />
+    <child link="front_right_wheel_roller_09" />
+    <origin xyz="-0.000000 0 -0.094000" rpy="0.000000000 1.570796000 0.785398000" />
+    <axis xyz="0 0 1" />
+    <limit effort="1.5" velocity="20" />
+    <dynamics damping="0.015" friction="0.01" />
+  </joint>
+  <gazebo reference="front_right_wheel_roller_09">
+    <mu1>0.8</mu1>
+    <mu2>0.8</mu2>
+    <kp>100000</kp>
+    <kd>8</kd>
+    <maxVel>0.5</maxVel>
+    <minDepth>0.001</minDepth>
+  </gazebo>
+  <link name="front_right_wheel_roller_10">
+    <inertial>
+      <origin xyz="0 0 0" />
+      <mass value="0.025" />
+      <inertia ixx="3.035833333333334e-05" ixy="0" ixz="0" iyy="3.035833333333334e-05" iyz="0" izz="8.449999999999999e-06" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.026" length="0.112" />
+      </geometry>
+      <material name="front_right_wheel_roller_10_mat">
+        <color rgba="0.16 0.16 0.18 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.026" length="0.112" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="front_right_wheel_roller_10_spin_joint" type="continuous">
+    <parent link="front_right_wheel" />
+    <child link="front_right_wheel_roller_10" />
+    <origin xyz="0.047000 0 -0.081406" rpy="0.000000000 1.209429000 0.857072000" />
+    <axis xyz="0 0 1" />
+    <limit effort="1.5" velocity="20" />
+    <dynamics damping="0.015" friction="0.01" />
+  </joint>
+  <gazebo reference="front_right_wheel_roller_10">
+    <mu1>0.8</mu1>
+    <mu2>0.8</mu2>
+    <kp>100000</kp>
+    <kd>8</kd>
+    <maxVel>0.5</maxVel>
+    <minDepth>0.001</minDepth>
+  </gazebo>
+  <link name="front_right_wheel_roller_11">
+    <inertial>
+      <origin xyz="0 0 0" />
+      <mass value="0.025" />
+      <inertia ixx="3.035833333333334e-05" ixy="0" ixz="0" iyy="3.035833333333334e-05" iyz="0" izz="8.449999999999999e-06" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.026" length="0.112" />
+      </geometry>
+      <material name="front_right_wheel_roller_11_mat">
+        <color rgba="0.16 0.16 0.18 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.026" length="0.112" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="front_right_wheel_roller_11_spin_joint" type="continuous">
+    <parent link="front_right_wheel" />
+    <child link="front_right_wheel_roller_11" />
+    <origin xyz="0.081406 0 -0.047000" rpy="0.000000000 0.911738000 1.107149000" />
+    <axis xyz="0 0 1" />
+    <limit effort="1.5" velocity="20" />
+    <dynamics damping="0.015" friction="0.01" />
+  </joint>
+  <gazebo reference="front_right_wheel_roller_11">
+    <mu1>0.8</mu1>
+    <mu2>0.8</mu2>
+    <kp>100000</kp>
+    <kd>8</kd>
+    <maxVel>0.5</maxVel>
+    <minDepth>0.001</minDepth>
+  </gazebo>
+  <link name="rear_left_wheel">
+    <inertial>
+      <origin xyz="0 0 0" />
+      <mass value="0.34" />
+      <inertia ixx="0.0007103733333333334" ixy="0" ixz="0" iyy="0.00114308" iyz="0" izz="0.0007103733333333334" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="1.57079632679 0 0" />
+      <geometry>
+        <cylinder radius="0.082" length="0.07" />
+      </geometry>
+      <material name="rear_left_wheel_mat">
+        <color rgba="0.12 0.12 0.14 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="1.57079632679 0 0" />
+      <geometry>
+        <cylinder radius="0.082" length="0.07" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="rear_left_wheel_drive_joint" type="continuous">
+    <parent link="base_link" />
+    <child link="rear_left_wheel" />
+    <origin xyz="-0.2 0.22 -0.10" />
+    <axis xyz="0 1 0" />
+    <limit effort="18" velocity="15" />
+    <dynamics damping="0.04" friction="0.02" />
+  </joint>
+  <gazebo reference="rear_left_wheel">
+    <mu1>0.5</mu1>
+    <mu2>0.5</mu2>
+    <kp>100000</kp>
+    <kd>8</kd>
+    <maxVel>0.5</maxVel>
+    <minDepth>0.001</minDepth>
+  </gazebo>
+  <link name="rear_left_wheel_roller_00">
+    <inertial>
+      <origin xyz="0 0 0" />
+      <mass value="0.025" />
+      <inertia ixx="3.035833333333334e-05" ixy="0" ixz="0" iyy="3.035833333333334e-05" iyz="0" izz="8.449999999999999e-06" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.026" length="0.112" />
+      </geometry>
+      <material name="rear_left_wheel_roller_00_mat">
+        <color rgba="0.16 0.16 0.18 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.026" length="0.112" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="rear_left_wheel_roller_00_spin_joint" type="continuous">
+    <parent link="rear_left_wheel" />
+    <child link="rear_left_wheel_roller_00" />
+    <origin xyz="0.094000 0 0.000000" rpy="0.000000000 0.785398000 1.570796000" />
+    <axis xyz="0 0 1" />
+    <limit effort="1.5" velocity="20" />
+    <dynamics damping="0.015" friction="0.01" />
+  </joint>
+  <gazebo reference="rear_left_wheel_roller_00">
+    <mu1>0.8</mu1>
+    <mu2>0.8</mu2>
+    <kp>100000</kp>
+    <kd>8</kd>
+    <maxVel>0.5</maxVel>
+    <minDepth>0.001</minDepth>
+  </gazebo>
+  <link name="rear_left_wheel_roller_01">
+    <inertial>
+      <origin xyz="0 0 0" />
+      <mass value="0.025" />
+      <inertia ixx="3.035833333333334e-05" ixy="0" ixz="0" iyy="3.035833333333334e-05" iyz="0" izz="8.449999999999999e-06" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.026" length="0.112" />
+      </geometry>
+      <material name="rear_left_wheel_roller_01_mat">
+        <color rgba="0.16 0.16 0.18 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.026" length="0.112" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="rear_left_wheel_roller_01_spin_joint" type="continuous">
+    <parent link="rear_left_wheel" />
+    <child link="rear_left_wheel_roller_01" />
+    <origin xyz="0.081406 0 0.047000" rpy="0.000000000 0.911738000 2.034444000" />
+    <axis xyz="0 0 1" />
+    <limit effort="1.5" velocity="20" />
+    <dynamics damping="0.015" friction="0.01" />
+  </joint>
+  <gazebo reference="rear_left_wheel_roller_01">
+    <mu1>0.8</mu1>
+    <mu2>0.8</mu2>
+    <kp>100000</kp>
+    <kd>8</kd>
+    <maxVel>0.5</maxVel>
+    <minDepth>0.001</minDepth>
+  </gazebo>
+  <link name="rear_left_wheel_roller_02">
+    <inertial>
+      <origin xyz="0 0 0" />
+      <mass value="0.025" />
+      <inertia ixx="3.035833333333334e-05" ixy="0" ixz="0" iyy="3.035833333333334e-05" iyz="0" izz="8.449999999999999e-06" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.026" length="0.112" />
+      </geometry>
+      <material name="rear_left_wheel_roller_02_mat">
+        <color rgba="0.16 0.16 0.18 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.026" length="0.112" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="rear_left_wheel_roller_02_spin_joint" type="continuous">
+    <parent link="rear_left_wheel" />
+    <child link="rear_left_wheel_roller_02" />
+    <origin xyz="0.047000 0 0.081406" rpy="0.000000000 1.209429000 2.284521000" />
+    <axis xyz="0 0 1" />
+    <limit effort="1.5" velocity="20" />
+    <dynamics damping="0.015" friction="0.01" />
+  </joint>
+  <gazebo reference="rear_left_wheel_roller_02">
+    <mu1>0.8</mu1>
+    <mu2>0.8</mu2>
+    <kp>100000</kp>
+    <kd>8</kd>
+    <maxVel>0.5</maxVel>
+    <minDepth>0.001</minDepth>
+  </gazebo>
+  <link name="rear_left_wheel_roller_03">
+    <inertial>
+      <origin xyz="0 0 0" />
+      <mass value="0.025" />
+      <inertia ixx="3.035833333333334e-05" ixy="0" ixz="0" iyy="3.035833333333334e-05" iyz="0" izz="8.449999999999999e-06" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.026" length="0.112" />
+      </geometry>
+      <material name="rear_left_wheel_roller_03_mat">
+        <color rgba="0.16 0.16 0.18 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.026" length="0.112" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="rear_left_wheel_roller_03_spin_joint" type="continuous">
+    <parent link="rear_left_wheel" />
+    <child link="rear_left_wheel_roller_03" />
+    <origin xyz="0.000000 0 0.094000" rpy="0.000000000 1.570796000 2.356194000" />
+    <axis xyz="0 0 1" />
+    <limit effort="1.5" velocity="20" />
+    <dynamics damping="0.015" friction="0.01" />
+  </joint>
+  <gazebo reference="rear_left_wheel_roller_03">
+    <mu1>0.8</mu1>
+    <mu2>0.8</mu2>
+    <kp>100000</kp>
+    <kd>8</kd>
+    <maxVel>0.5</maxVel>
+    <minDepth>0.001</minDepth>
+  </gazebo>
+  <link name="rear_left_wheel_roller_04">
+    <inertial>
+      <origin xyz="0 0 0" />
+      <mass value="0.025" />
+      <inertia ixx="3.035833333333334e-05" ixy="0" ixz="0" iyy="3.035833333333334e-05" iyz="0" izz="8.449999999999999e-06" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.026" length="0.112" />
+      </geometry>
+      <material name="rear_left_wheel_roller_04_mat">
+        <color rgba="0.16 0.16 0.18 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.026" length="0.112" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="rear_left_wheel_roller_04_spin_joint" type="continuous">
+    <parent link="rear_left_wheel" />
+    <child link="rear_left_wheel_roller_04" />
+    <origin xyz="-0.047000 0 0.081406" rpy="0.000000000 1.932163000 2.284521000" />
+    <axis xyz="0 0 1" />
+    <limit effort="1.5" velocity="20" />
+    <dynamics damping="0.015" friction="0.01" />
+  </joint>
+  <gazebo reference="rear_left_wheel_roller_04">
+    <mu1>0.8</mu1>
+    <mu2>0.8</mu2>
+    <kp>100000</kp>
+    <kd>8</kd>
+    <maxVel>0.5</maxVel>
+    <minDepth>0.001</minDepth>
+  </gazebo>
+  <link name="rear_left_wheel_roller_05">
+    <inertial>
+      <origin xyz="0 0 0" />
+      <mass value="0.025" />
+      <inertia ixx="3.035833333333334e-05" ixy="0" ixz="0" iyy="3.035833333333334e-05" iyz="0" izz="8.449999999999999e-06" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.026" length="0.112" />
+      </geometry>
+      <material name="rear_left_wheel_roller_05_mat">
+        <color rgba="0.16 0.16 0.18 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.026" length="0.112" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="rear_left_wheel_roller_05_spin_joint" type="continuous">
+    <parent link="rear_left_wheel" />
+    <child link="rear_left_wheel_roller_05" />
+    <origin xyz="-0.081406 0 0.047000" rpy="0.000000000 2.229854000 2.034444000" />
+    <axis xyz="0 0 1" />
+    <limit effort="1.5" velocity="20" />
+    <dynamics damping="0.015" friction="0.01" />
+  </joint>
+  <gazebo reference="rear_left_wheel_roller_05">
+    <mu1>0.8</mu1>
+    <mu2>0.8</mu2>
+    <kp>100000</kp>
+    <kd>8</kd>
+    <maxVel>0.5</maxVel>
+    <minDepth>0.001</minDepth>
+  </gazebo>
+  <link name="rear_left_wheel_roller_06">
+    <inertial>
+      <origin xyz="0 0 0" />
+      <mass value="0.025" />
+      <inertia ixx="3.035833333333334e-05" ixy="0" ixz="0" iyy="3.035833333333334e-05" iyz="0" izz="8.449999999999999e-06" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.026" length="0.112" />
+      </geometry>
+      <material name="rear_left_wheel_roller_06_mat">
+        <color rgba="0.16 0.16 0.18 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.026" length="0.112" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="rear_left_wheel_roller_06_spin_joint" type="continuous">
+    <parent link="rear_left_wheel" />
+    <child link="rear_left_wheel_roller_06" />
+    <origin xyz="-0.094000 0 0.000000" rpy="0.000000000 2.356194000 1.570796000" />
+    <axis xyz="0 0 1" />
+    <limit effort="1.5" velocity="20" />
+    <dynamics damping="0.015" friction="0.01" />
+  </joint>
+  <gazebo reference="rear_left_wheel_roller_06">
+    <mu1>0.8</mu1>
+    <mu2>0.8</mu2>
+    <kp>100000</kp>
+    <kd>8</kd>
+    <maxVel>0.5</maxVel>
+    <minDepth>0.001</minDepth>
+  </gazebo>
+  <link name="rear_left_wheel_roller_07">
+    <inertial>
+      <origin xyz="0 0 0" />
+      <mass value="0.025" />
+      <inertia ixx="3.035833333333334e-05" ixy="0" ixz="0" iyy="3.035833333333334e-05" iyz="0" izz="8.449999999999999e-06" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.026" length="0.112" />
+      </geometry>
+      <material name="rear_left_wheel_roller_07_mat">
+        <color rgba="0.16 0.16 0.18 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.026" length="0.112" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="rear_left_wheel_roller_07_spin_joint" type="continuous">
+    <parent link="rear_left_wheel" />
+    <child link="rear_left_wheel_roller_07" />
+    <origin xyz="-0.081406 0 -0.047000" rpy="0.000000000 2.229854000 1.107149000" />
+    <axis xyz="0 0 1" />
+    <limit effort="1.5" velocity="20" />
+    <dynamics damping="0.015" friction="0.01" />
+  </joint>
+  <gazebo reference="rear_left_wheel_roller_07">
+    <mu1>0.8</mu1>
+    <mu2>0.8</mu2>
+    <kp>100000</kp>
+    <kd>8</kd>
+    <maxVel>0.5</maxVel>
+    <minDepth>0.001</minDepth>
+  </gazebo>
+  <link name="rear_left_wheel_roller_08">
+    <inertial>
+      <origin xyz="0 0 0" />
+      <mass value="0.025" />
+      <inertia ixx="3.035833333333334e-05" ixy="0" ixz="0" iyy="3.035833333333334e-05" iyz="0" izz="8.449999999999999e-06" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.026" length="0.112" />
+      </geometry>
+      <material name="rear_left_wheel_roller_08_mat">
+        <color rgba="0.16 0.16 0.18 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.026" length="0.112" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="rear_left_wheel_roller_08_spin_joint" type="continuous">
+    <parent link="rear_left_wheel" />
+    <child link="rear_left_wheel_roller_08" />
+    <origin xyz="-0.047000 0 -0.081406" rpy="0.000000000 1.932163000 0.857072000" />
+    <axis xyz="0 0 1" />
+    <limit effort="1.5" velocity="20" />
+    <dynamics damping="0.015" friction="0.01" />
+  </joint>
+  <gazebo reference="rear_left_wheel_roller_08">
+    <mu1>0.8</mu1>
+    <mu2>0.8</mu2>
+    <kp>100000</kp>
+    <kd>8</kd>
+    <maxVel>0.5</maxVel>
+    <minDepth>0.001</minDepth>
+  </gazebo>
+  <link name="rear_left_wheel_roller_09">
+    <inertial>
+      <origin xyz="0 0 0" />
+      <mass value="0.025" />
+      <inertia ixx="3.035833333333334e-05" ixy="0" ixz="0" iyy="3.035833333333334e-05" iyz="0" izz="8.449999999999999e-06" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.026" length="0.112" />
+      </geometry>
+      <material name="rear_left_wheel_roller_09_mat">
+        <color rgba="0.16 0.16 0.18 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.026" length="0.112" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="rear_left_wheel_roller_09_spin_joint" type="continuous">
+    <parent link="rear_left_wheel" />
+    <child link="rear_left_wheel_roller_09" />
+    <origin xyz="-0.000000 0 -0.094000" rpy="0.000000000 1.570796000 0.785398000" />
+    <axis xyz="0 0 1" />
+    <limit effort="1.5" velocity="20" />
+    <dynamics damping="0.015" friction="0.01" />
+  </joint>
+  <gazebo reference="rear_left_wheel_roller_09">
+    <mu1>0.8</mu1>
+    <mu2>0.8</mu2>
+    <kp>100000</kp>
+    <kd>8</kd>
+    <maxVel>0.5</maxVel>
+    <minDepth>0.001</minDepth>
+  </gazebo>
+  <link name="rear_left_wheel_roller_10">
+    <inertial>
+      <origin xyz="0 0 0" />
+      <mass value="0.025" />
+      <inertia ixx="3.035833333333334e-05" ixy="0" ixz="0" iyy="3.035833333333334e-05" iyz="0" izz="8.449999999999999e-06" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.026" length="0.112" />
+      </geometry>
+      <material name="rear_left_wheel_roller_10_mat">
+        <color rgba="0.16 0.16 0.18 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.026" length="0.112" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="rear_left_wheel_roller_10_spin_joint" type="continuous">
+    <parent link="rear_left_wheel" />
+    <child link="rear_left_wheel_roller_10" />
+    <origin xyz="0.047000 0 -0.081406" rpy="0.000000000 1.209429000 0.857072000" />
+    <axis xyz="0 0 1" />
+    <limit effort="1.5" velocity="20" />
+    <dynamics damping="0.015" friction="0.01" />
+  </joint>
+  <gazebo reference="rear_left_wheel_roller_10">
+    <mu1>0.8</mu1>
+    <mu2>0.8</mu2>
+    <kp>100000</kp>
+    <kd>8</kd>
+    <maxVel>0.5</maxVel>
+    <minDepth>0.001</minDepth>
+  </gazebo>
+  <link name="rear_left_wheel_roller_11">
+    <inertial>
+      <origin xyz="0 0 0" />
+      <mass value="0.025" />
+      <inertia ixx="3.035833333333334e-05" ixy="0" ixz="0" iyy="3.035833333333334e-05" iyz="0" izz="8.449999999999999e-06" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.026" length="0.112" />
+      </geometry>
+      <material name="rear_left_wheel_roller_11_mat">
+        <color rgba="0.16 0.16 0.18 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.026" length="0.112" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="rear_left_wheel_roller_11_spin_joint" type="continuous">
+    <parent link="rear_left_wheel" />
+    <child link="rear_left_wheel_roller_11" />
+    <origin xyz="0.081406 0 -0.047000" rpy="0.000000000 0.911738000 1.107149000" />
+    <axis xyz="0 0 1" />
+    <limit effort="1.5" velocity="20" />
+    <dynamics damping="0.015" friction="0.01" />
+  </joint>
+  <gazebo reference="rear_left_wheel_roller_11">
+    <mu1>0.8</mu1>
+    <mu2>0.8</mu2>
+    <kp>100000</kp>
+    <kd>8</kd>
+    <maxVel>0.5</maxVel>
+    <minDepth>0.001</minDepth>
+  </gazebo>
+  <link name="rear_right_wheel">
+    <inertial>
+      <origin xyz="0 0 0" />
+      <mass value="0.34" />
+      <inertia ixx="0.0007103733333333334" ixy="0" ixz="0" iyy="0.00114308" iyz="0" izz="0.0007103733333333334" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="1.57079632679 0 0" />
+      <geometry>
+        <cylinder radius="0.082" length="0.07" />
+      </geometry>
+      <material name="rear_right_wheel_mat">
+        <color rgba="0.12 0.12 0.14 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="1.57079632679 0 0" />
+      <geometry>
+        <cylinder radius="0.082" length="0.07" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="rear_right_wheel_drive_joint" type="continuous">
+    <parent link="base_link" />
+    <child link="rear_right_wheel" />
+    <origin xyz="-0.2 -0.22 -0.10" />
+    <axis xyz="0 1 0" />
+    <limit effort="18" velocity="15" />
+    <dynamics damping="0.04" friction="0.02" />
+  </joint>
+  <gazebo reference="rear_right_wheel">
+    <mu1>0.5</mu1>
+    <mu2>0.5</mu2>
+    <kp>100000</kp>
+    <kd>8</kd>
+    <maxVel>0.5</maxVel>
+    <minDepth>0.001</minDepth>
+  </gazebo>
+  <link name="rear_right_wheel_roller_00">
+    <inertial>
+      <origin xyz="0 0 0" />
+      <mass value="0.025" />
+      <inertia ixx="3.035833333333334e-05" ixy="0" ixz="0" iyy="3.035833333333334e-05" iyz="0" izz="8.449999999999999e-06" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.026" length="0.112" />
+      </geometry>
+      <material name="rear_right_wheel_roller_00_mat">
+        <color rgba="0.16 0.16 0.18 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.026" length="0.112" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="rear_right_wheel_roller_00_spin_joint" type="continuous">
+    <parent link="rear_right_wheel" />
+    <child link="rear_right_wheel_roller_00" />
+    <origin xyz="0.094000 0 0.000000" rpy="0.000000000 0.785398000 -1.570796000" />
+    <axis xyz="0 0 1" />
+    <limit effort="1.5" velocity="20" />
+    <dynamics damping="0.015" friction="0.01" />
+  </joint>
+  <gazebo reference="rear_right_wheel_roller_00">
+    <mu1>0.8</mu1>
+    <mu2>0.8</mu2>
+    <kp>100000</kp>
+    <kd>8</kd>
+    <maxVel>0.5</maxVel>
+    <minDepth>0.001</minDepth>
+  </gazebo>
+  <link name="rear_right_wheel_roller_01">
+    <inertial>
+      <origin xyz="0 0 0" />
+      <mass value="0.025" />
+      <inertia ixx="3.035833333333334e-05" ixy="0" ixz="0" iyy="3.035833333333334e-05" iyz="0" izz="8.449999999999999e-06" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.026" length="0.112" />
+      </geometry>
+      <material name="rear_right_wheel_roller_01_mat">
+        <color rgba="0.16 0.16 0.18 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.026" length="0.112" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="rear_right_wheel_roller_01_spin_joint" type="continuous">
+    <parent link="rear_right_wheel" />
+    <child link="rear_right_wheel_roller_01" />
+    <origin xyz="0.081406 0 0.047000" rpy="0.000000000 0.911738000 -2.034444000" />
+    <axis xyz="0 0 1" />
+    <limit effort="1.5" velocity="20" />
+    <dynamics damping="0.015" friction="0.01" />
+  </joint>
+  <gazebo reference="rear_right_wheel_roller_01">
+    <mu1>0.8</mu1>
+    <mu2>0.8</mu2>
+    <kp>100000</kp>
+    <kd>8</kd>
+    <maxVel>0.5</maxVel>
+    <minDepth>0.001</minDepth>
+  </gazebo>
+  <link name="rear_right_wheel_roller_02">
+    <inertial>
+      <origin xyz="0 0 0" />
+      <mass value="0.025" />
+      <inertia ixx="3.035833333333334e-05" ixy="0" ixz="0" iyy="3.035833333333334e-05" iyz="0" izz="8.449999999999999e-06" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.026" length="0.112" />
+      </geometry>
+      <material name="rear_right_wheel_roller_02_mat">
+        <color rgba="0.16 0.16 0.18 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.026" length="0.112" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="rear_right_wheel_roller_02_spin_joint" type="continuous">
+    <parent link="rear_right_wheel" />
+    <child link="rear_right_wheel_roller_02" />
+    <origin xyz="0.047000 0 0.081406" rpy="0.000000000 1.209429000 -2.284521000" />
+    <axis xyz="0 0 1" />
+    <limit effort="1.5" velocity="20" />
+    <dynamics damping="0.015" friction="0.01" />
+  </joint>
+  <gazebo reference="rear_right_wheel_roller_02">
+    <mu1>0.8</mu1>
+    <mu2>0.8</mu2>
+    <kp>100000</kp>
+    <kd>8</kd>
+    <maxVel>0.5</maxVel>
+    <minDepth>0.001</minDepth>
+  </gazebo>
+  <link name="rear_right_wheel_roller_03">
+    <inertial>
+      <origin xyz="0 0 0" />
+      <mass value="0.025" />
+      <inertia ixx="3.035833333333334e-05" ixy="0" ixz="0" iyy="3.035833333333334e-05" iyz="0" izz="8.449999999999999e-06" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.026" length="0.112" />
+      </geometry>
+      <material name="rear_right_wheel_roller_03_mat">
+        <color rgba="0.16 0.16 0.18 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.026" length="0.112" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="rear_right_wheel_roller_03_spin_joint" type="continuous">
+    <parent link="rear_right_wheel" />
+    <child link="rear_right_wheel_roller_03" />
+    <origin xyz="0.000000 0 0.094000" rpy="0.000000000 1.570796000 -2.356194000" />
+    <axis xyz="0 0 1" />
+    <limit effort="1.5" velocity="20" />
+    <dynamics damping="0.015" friction="0.01" />
+  </joint>
+  <gazebo reference="rear_right_wheel_roller_03">
+    <mu1>0.8</mu1>
+    <mu2>0.8</mu2>
+    <kp>100000</kp>
+    <kd>8</kd>
+    <maxVel>0.5</maxVel>
+    <minDepth>0.001</minDepth>
+  </gazebo>
+  <link name="rear_right_wheel_roller_04">
+    <inertial>
+      <origin xyz="0 0 0" />
+      <mass value="0.025" />
+      <inertia ixx="3.035833333333334e-05" ixy="0" ixz="0" iyy="3.035833333333334e-05" iyz="0" izz="8.449999999999999e-06" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.026" length="0.112" />
+      </geometry>
+      <material name="rear_right_wheel_roller_04_mat">
+        <color rgba="0.16 0.16 0.18 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.026" length="0.112" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="rear_right_wheel_roller_04_spin_joint" type="continuous">
+    <parent link="rear_right_wheel" />
+    <child link="rear_right_wheel_roller_04" />
+    <origin xyz="-0.047000 0 0.081406" rpy="0.000000000 1.932163000 -2.284521000" />
+    <axis xyz="0 0 1" />
+    <limit effort="1.5" velocity="20" />
+    <dynamics damping="0.015" friction="0.01" />
+  </joint>
+  <gazebo reference="rear_right_wheel_roller_04">
+    <mu1>0.8</mu1>
+    <mu2>0.8</mu2>
+    <kp>100000</kp>
+    <kd>8</kd>
+    <maxVel>0.5</maxVel>
+    <minDepth>0.001</minDepth>
+  </gazebo>
+  <link name="rear_right_wheel_roller_05">
+    <inertial>
+      <origin xyz="0 0 0" />
+      <mass value="0.025" />
+      <inertia ixx="3.035833333333334e-05" ixy="0" ixz="0" iyy="3.035833333333334e-05" iyz="0" izz="8.449999999999999e-06" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.026" length="0.112" />
+      </geometry>
+      <material name="rear_right_wheel_roller_05_mat">
+        <color rgba="0.16 0.16 0.18 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.026" length="0.112" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="rear_right_wheel_roller_05_spin_joint" type="continuous">
+    <parent link="rear_right_wheel" />
+    <child link="rear_right_wheel_roller_05" />
+    <origin xyz="-0.081406 0 0.047000" rpy="0.000000000 2.229854000 -2.034444000" />
+    <axis xyz="0 0 1" />
+    <limit effort="1.5" velocity="20" />
+    <dynamics damping="0.015" friction="0.01" />
+  </joint>
+  <gazebo reference="rear_right_wheel_roller_05">
+    <mu1>0.8</mu1>
+    <mu2>0.8</mu2>
+    <kp>100000</kp>
+    <kd>8</kd>
+    <maxVel>0.5</maxVel>
+    <minDepth>0.001</minDepth>
+  </gazebo>
+  <link name="rear_right_wheel_roller_06">
+    <inertial>
+      <origin xyz="0 0 0" />
+      <mass value="0.025" />
+      <inertia ixx="3.035833333333334e-05" ixy="0" ixz="0" iyy="3.035833333333334e-05" iyz="0" izz="8.449999999999999e-06" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.026" length="0.112" />
+      </geometry>
+      <material name="rear_right_wheel_roller_06_mat">
+        <color rgba="0.16 0.16 0.18 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.026" length="0.112" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="rear_right_wheel_roller_06_spin_joint" type="continuous">
+    <parent link="rear_right_wheel" />
+    <child link="rear_right_wheel_roller_06" />
+    <origin xyz="-0.094000 0 0.000000" rpy="0.000000000 2.356194000 -1.570796000" />
+    <axis xyz="0 0 1" />
+    <limit effort="1.5" velocity="20" />
+    <dynamics damping="0.015" friction="0.01" />
+  </joint>
+  <gazebo reference="rear_right_wheel_roller_06">
+    <mu1>0.8</mu1>
+    <mu2>0.8</mu2>
+    <kp>100000</kp>
+    <kd>8</kd>
+    <maxVel>0.5</maxVel>
+    <minDepth>0.001</minDepth>
+  </gazebo>
+  <link name="rear_right_wheel_roller_07">
+    <inertial>
+      <origin xyz="0 0 0" />
+      <mass value="0.025" />
+      <inertia ixx="3.035833333333334e-05" ixy="0" ixz="0" iyy="3.035833333333334e-05" iyz="0" izz="8.449999999999999e-06" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.026" length="0.112" />
+      </geometry>
+      <material name="rear_right_wheel_roller_07_mat">
+        <color rgba="0.16 0.16 0.18 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.026" length="0.112" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="rear_right_wheel_roller_07_spin_joint" type="continuous">
+    <parent link="rear_right_wheel" />
+    <child link="rear_right_wheel_roller_07" />
+    <origin xyz="-0.081406 0 -0.047000" rpy="0.000000000 2.229854000 -1.107149000" />
+    <axis xyz="0 0 1" />
+    <limit effort="1.5" velocity="20" />
+    <dynamics damping="0.015" friction="0.01" />
+  </joint>
+  <gazebo reference="rear_right_wheel_roller_07">
+    <mu1>0.8</mu1>
+    <mu2>0.8</mu2>
+    <kp>100000</kp>
+    <kd>8</kd>
+    <maxVel>0.5</maxVel>
+    <minDepth>0.001</minDepth>
+  </gazebo>
+  <link name="rear_right_wheel_roller_08">
+    <inertial>
+      <origin xyz="0 0 0" />
+      <mass value="0.025" />
+      <inertia ixx="3.035833333333334e-05" ixy="0" ixz="0" iyy="3.035833333333334e-05" iyz="0" izz="8.449999999999999e-06" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.026" length="0.112" />
+      </geometry>
+      <material name="rear_right_wheel_roller_08_mat">
+        <color rgba="0.16 0.16 0.18 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.026" length="0.112" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="rear_right_wheel_roller_08_spin_joint" type="continuous">
+    <parent link="rear_right_wheel" />
+    <child link="rear_right_wheel_roller_08" />
+    <origin xyz="-0.047000 0 -0.081406" rpy="0.000000000 1.932163000 -0.857072000" />
+    <axis xyz="0 0 1" />
+    <limit effort="1.5" velocity="20" />
+    <dynamics damping="0.015" friction="0.01" />
+  </joint>
+  <gazebo reference="rear_right_wheel_roller_08">
+    <mu1>0.8</mu1>
+    <mu2>0.8</mu2>
+    <kp>100000</kp>
+    <kd>8</kd>
+    <maxVel>0.5</maxVel>
+    <minDepth>0.001</minDepth>
+  </gazebo>
+  <link name="rear_right_wheel_roller_09">
+    <inertial>
+      <origin xyz="0 0 0" />
+      <mass value="0.025" />
+      <inertia ixx="3.035833333333334e-05" ixy="0" ixz="0" iyy="3.035833333333334e-05" iyz="0" izz="8.449999999999999e-06" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.026" length="0.112" />
+      </geometry>
+      <material name="rear_right_wheel_roller_09_mat">
+        <color rgba="0.16 0.16 0.18 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.026" length="0.112" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="rear_right_wheel_roller_09_spin_joint" type="continuous">
+    <parent link="rear_right_wheel" />
+    <child link="rear_right_wheel_roller_09" />
+    <origin xyz="-0.000000 0 -0.094000" rpy="0.000000000 1.570796000 -0.785398000" />
+    <axis xyz="0 0 1" />
+    <limit effort="1.5" velocity="20" />
+    <dynamics damping="0.015" friction="0.01" />
+  </joint>
+  <gazebo reference="rear_right_wheel_roller_09">
+    <mu1>0.8</mu1>
+    <mu2>0.8</mu2>
+    <kp>100000</kp>
+    <kd>8</kd>
+    <maxVel>0.5</maxVel>
+    <minDepth>0.001</minDepth>
+  </gazebo>
+  <link name="rear_right_wheel_roller_10">
+    <inertial>
+      <origin xyz="0 0 0" />
+      <mass value="0.025" />
+      <inertia ixx="3.035833333333334e-05" ixy="0" ixz="0" iyy="3.035833333333334e-05" iyz="0" izz="8.449999999999999e-06" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.026" length="0.112" />
+      </geometry>
+      <material name="rear_right_wheel_roller_10_mat">
+        <color rgba="0.16 0.16 0.18 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.026" length="0.112" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="rear_right_wheel_roller_10_spin_joint" type="continuous">
+    <parent link="rear_right_wheel" />
+    <child link="rear_right_wheel_roller_10" />
+    <origin xyz="0.047000 0 -0.081406" rpy="0.000000000 1.209429000 -0.857072000" />
+    <axis xyz="0 0 1" />
+    <limit effort="1.5" velocity="20" />
+    <dynamics damping="0.015" friction="0.01" />
+  </joint>
+  <gazebo reference="rear_right_wheel_roller_10">
+    <mu1>0.8</mu1>
+    <mu2>0.8</mu2>
+    <kp>100000</kp>
+    <kd>8</kd>
+    <maxVel>0.5</maxVel>
+    <minDepth>0.001</minDepth>
+  </gazebo>
+  <link name="rear_right_wheel_roller_11">
+    <inertial>
+      <origin xyz="0 0 0" />
+      <mass value="0.025" />
+      <inertia ixx="3.035833333333334e-05" ixy="0" ixz="0" iyy="3.035833333333334e-05" iyz="0" izz="8.449999999999999e-06" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.026" length="0.112" />
+      </geometry>
+      <material name="rear_right_wheel_roller_11_mat">
+        <color rgba="0.16 0.16 0.18 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.026" length="0.112" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="rear_right_wheel_roller_11_spin_joint" type="continuous">
+    <parent link="rear_right_wheel" />
+    <child link="rear_right_wheel_roller_11" />
+    <origin xyz="0.081406 0 -0.047000" rpy="0.000000000 0.911738000 -1.107149000" />
+    <axis xyz="0 0 1" />
+    <limit effort="1.5" velocity="20" />
+    <dynamics damping="0.015" friction="0.01" />
+  </joint>
+  <gazebo reference="rear_right_wheel_roller_11">
+    <mu1>0.8</mu1>
+    <mu2>0.8</mu2>
+    <kp>100000</kp>
+    <kd>8</kd>
+    <maxVel>0.5</maxVel>
+    <minDepth>0.001</minDepth>
+  </gazebo>
+  <link name="lift_carriage">
+    <inertial>
+      <origin xyz="0 0 .14" />
+      <mass value="1.0" />
+      <inertia ixx="0.0013666666666666669" ixy="0" ixz="0" iyy="0.0013666666666666669" iyz="0" izz="0.0010666666666666667" />
+    </inertial>
+    <visual>
+      <geometry>
+        <box size="0.08 0.08 0.1" />
+      </geometry>
+      <material name="lift_carriage_mat">
+        <color rgba="0.78 0.64 0.16 1" />
+      </material>
+      <origin xyz="0 0 .14" />
+    </visual>
+    <collision>
+      <geometry>
+        <box size="0.08 0.08 0.1" />
+      </geometry>
+      <origin xyz="0 0 .14" />
+    </collision>
+  </link>
+  <joint name="lift_joint" type="prismatic">
+    <parent link="base_link" />
+    <child link="lift_carriage" />
+    <origin xyz="0 0 0.05" />
+    <axis xyz="0 0 1" />
+    <limit lower="-.07" upper="0.70" effort="120" velocity="0.30" />
+    <dynamics damping="25" friction="2" />
+  </joint>
+  <link name="reach_stage">
+    <inertial>
+      <origin xyz=".15 0 .12" />
+      <mass value="0.65" />
+      <inertia ixx="0.0005416666666666668" ixy="0" ixz="0" iyy="0.005070000000000001" iyz="0" izz="0.005221666666666667" />
+    </inertial>
+    <visual>
+      <origin xyz=".15 0 .12" />
+      <geometry>
+        <box size="0.3 0.08 0.06" />
+      </geometry>
+      <material name="reach_stage_mat">
+        <color rgba="0.78 0.64 0.16 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz=".15 0 .12" />
+      <geometry>
+        <box size="0.3 0.08 0.06" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="reach_joint" type="prismatic">
+    <parent link="lift_carriage" />
+    <child link="reach_stage" />
+    <origin xyz="0 0 0" />
+    <axis xyz="1 0 0" />
+    <limit lower="0" upper="0.30" effort="80" velocity="0.25" />
+    <dynamics damping="20" friction="1" />
+  </joint>
+  <link name="gripper_base">
+    <visual>
+      <geometry>
+        <box size="0.10 0.46 0.035" />
+      </geometry>
+      <material name="gripper_base_mat">
+        <color rgba="0.30 0.32 0.34 1" />
+      </material>
+      <origin xyz="0 0 0.21" />
+    </visual>
+    <collision>
+      <geometry>
+        <box size="0.10 0.46 0.035" />
+      </geometry>
+      <origin xyz="0 0 0.21" />
+    </collision>
+    <inertial>
+      <origin xyz="0 0 0.21" />
+      <mass value="0.35" />
+      <inertia ixx="0.006207395833333334" iyy="0.0003273958333333334" izz="0.006463333333333334" ixy="0" ixz="0" iyz="0" />
+    </inertial>
+  </link>
+  <joint name="cap_flip_joint" type="revolute">
+    <parent link="reach_stage" />
+    <child link="gripper_base" />
+    <origin xyz="0.30 0 -0.10" />
+    <axis xyz="1 0 0" />
+    <limit lower="-1.5707963" upper="1.5707963" effort="25" velocity="0.5" />
+    <dynamics damping="2" friction="0.2" />
+  </joint>
+  <link name="jaw_left_link">
+    <inertial>
+      <origin xyz="0 0 0" />
+      <mass value="0.1" />
+      <inertia ixx="0.00033854166666666673" ixy="0" ixz="0" iyy="0.0003633333333333334" iyz="0" izz="3.520833333333333e-05" />
+    </inertial>
+    <visual>
+      <geometry>
+        <box size="0.06 0.025 0.2" />
+      </geometry>
+      <material name="jaw_left_link_mat">
+        <color rgba="0.85 0.82 0.72 1" />
+      </material>
+    </visual>
+    <collision>
+      <geometry>
+        <box size="0.06 0.025 0.2" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="jaw_left_joint" type="prismatic">
+    <parent link="gripper_base" />
+    <child link="jaw_left_link" />
+    <origin xyz="0 0.05 0" />
+    <axis xyz="0 1 0" />
+    <limit lower="0" upper="0.17" effort="45" velocity="0.15" />
+    <dynamics damping="8" friction="1" />
+  </joint>
+  <link name="jaw_right_link">
+    <inertial>
+      <origin xyz="0 0 0" />
+      <mass value="0.1" />
+      <inertia ixx="0.00033854166666666673" ixy="0" ixz="0" iyy="0.0003633333333333334" iyz="0" izz="3.520833333333333e-05" />
+    </inertial>
+    <visual>
+      <geometry>
+        <box size="0.06 0.025 0.2" />
+      </geometry>
+      <material name="jaw_right_link_mat">
+        <color rgba="0.85 0.82 0.72 1" />
+      </material>
+    </visual>
+    <collision>
+      <geometry>
+        <box size="0.06 0.025 0.2" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="jaw_right_joint" type="prismatic">
+    <parent link="gripper_base" />
+    <child link="jaw_right_link" />
+    <origin xyz="0 -0.05 0" />
+    <axis xyz="0 -1 0" />
+    <limit lower="0" upper="0.17" effort="45" velocity="0.15" />
+    <dynamics damping="8" friction="1" />
+  </joint>
+  <gazebo reference="jaw_left_link">
+    <mu1>0.9</mu1>
+    <mu2>0.9</mu2>
+    <kp>50000</kp>
+    <kd>5</kd>
+  </gazebo>
+  <gazebo reference="jaw_right_link">
+    <mu1>0.9</mu1>
+    <mu2>0.9</mu2>
+    <kp>50000</kp>
+    <kd>5</kd>
+  </gazebo>
+  <link name="wrist_camera_link">
+    <inertial>
+      <mass value="0.03" />
+      <inertia ixx="0.00001" ixy="0" ixz="0" iyy="0.00001" iyz="0" izz="0.00001" />
+    </inertial>
+  </link>
+  <joint name="wrist_camera_mount_joint" type="fixed">
+    <parent link="gripper_base" />
+    <child link="wrist_camera_link" />
+    <origin xyz="-.08 0 .25" />
+  </joint>
+  <link name="cap_cradle">
+    <visual>
+      <geometry>
+        <box size="0.025 0.08 0.08" />
+      </geometry>
+      <material name="cap_cradle_mat">
+        <color rgba="0.25 0.28 0.31 1" />
+      </material>
+      <origin xyz="-0.19 0 0" />
+    </visual>
+    <collision>
+      <geometry>
+        <box size="0.025 0.08 0.08" />
+      </geometry>
+      <origin xyz="-0.19 0 0" />
+    </collision>
+    <inertial>
+      <origin xyz="-0.19 0 0" />
+      <mass value="0.12" />
+      <inertia ixx="0.000128" iyy="7.025e-05" izz="7.025e-05" ixy="0" ixz="0" iyz="0" />
+    </inertial>
+  </link>
+  <gazebo reference="cap_cradle">
+    <mu1>0.9</mu1>
+    <mu2>0.9</mu2>
+    <kp>50000</kp>
+    <kd>5</kd>
+  </gazebo>
+  <link name="lidar_link">
+    <inertial>
+      <mass value=".260" />
+      <inertia ixx="0.0001695416666666667" ixy="0" ixz="0" iyy="0.0001695416666666667" iyz="0" izz="0.00018308333333333336" />
+    </inertial>
+    <visual>
+      <geometry>
+        <box size=".065 .065 .060" />
+      </geometry>
+      <material name="lidar_grey">
+        <color rgba="0.2 0.2 0.22 1" />
+      </material>
+    </visual>
+    <collision>
+      <geometry>
+        <box size=".065 .065 .060" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="lidar_mount_joint" type="fixed">
+    <parent link="base_link" />
+    <child link="lidar_link" />
+    <origin xyz="-0.18 0 0.385" />
+  </joint>
+  <link name="imu_link">
+    <inertial>
+      <mass value=".005" />
+      <inertia ixx="0.00001" ixy="0" ixz="0" iyy="0.00001" iyz="0" izz="0.00001" />
+    </inertial>
+  </link>
+  <joint name="imu_mount_joint" type="fixed">
+    <parent link="base_link" />
+    <child link="imu_link" />
+    <origin xyz="-0.18 0 0.385" />
+  </joint>
+  <link name="front_camera_link">
+    <inertial>
+      <mass value="0.04" />
+      <inertia ixx="0.00001" ixy="0" ixz="0" iyy="0.00001" iyz="0" izz="0.00001" />
+    </inertial>
+  </link>
+  <joint name="front_camera_mount_joint" type="fixed">
+    <parent link="base_link" />
+    <child link="front_camera_link" />
+    <origin xyz="0.20 0 0.14" rpy="0 0 0" />
+  </joint>
+  <gazebo reference="lidar_link">
+    <sensor name="br_mid360_lidar" type="gpu_lidar">
+      <topic>/br/sim/lidar</topic>
+      <update_rate>10</update_rate>
+      <always_on>true</always_on>
+      <visualize>false</visualize>
+      <ray>
+        <scan>
+          <horizontal>
+            <samples>360</samples>
+            <resolution>1</resolution>
+            <min_angle>-3.14159265</min_angle>
+            <max_angle>3.14159265</max_angle>
+          </horizontal>
+          <vertical>
+            <samples>32</samples>
+            <resolution>1</resolution>
+            <min_angle>-0.12217</min_angle>
+            <max_angle>0.90757</max_angle>
+          </vertical>
+        </scan>
+        <range>
+          <min>0.10</min>
+          <max>40.0</max>
+          <resolution>0.01</resolution>
+        </range>
+      </ray>
+      <ignition_frame_id>br/lidar_link</ignition_frame_id>
+    </sensor>
+    <preserveFixedJoint>true</preserveFixedJoint>
+  </gazebo>
+  <gazebo reference="imu_link">
+    <sensor name="br_imu" type="imu">
+      <topic>/br/sim/imu</topic>
+      <update_rate>200</update_rate>
+      <always_on>true</always_on>
+      <visualize>false</visualize>
+      <ignition_frame_id>br/imu_link</ignition_frame_id>
+    </sensor>
+    <preserveFixedJoint>true</preserveFixedJoint>
+  </gazebo>
+  <gazebo reference="front_camera_link">
+    <sensor name="br_color_camera" type="camera">
+      <topic>/br/sim/camera/color</topic>
+      <update_rate>30</update_rate>
+      <always_on>true</always_on>
+      <visualize>false</visualize>
+      <camera>
+        <horizontal_fov>1.0472</horizontal_fov>
+        <image>
+          <width>640</width>
+          <height>480</height>
+          <format>R8G8B8</format>
+        </image>
+        <clip>
+          <near>0.05</near>
+          <far>12.0</far>
+        </clip>
+      </camera>
+    </sensor>
+    <preserveFixedJoint>true</preserveFixedJoint>
+  </gazebo>
+  <gazebo>
+    <plugin filename="ignition-gazebo-mecanum-drive-system" name="ignition::gazebo::systems::MecanumDrive">
+      <topic>/br/cmd_vel</topic>
+      <front_left_joint>front_left_wheel_drive_joint</front_left_joint>
+      <front_right_joint>front_right_wheel_drive_joint</front_right_joint>
+      <back_left_joint>rear_left_wheel_drive_joint</back_left_joint>
+      <back_right_joint>rear_right_wheel_drive_joint</back_right_joint>
+      <wheel_separation>0.44</wheel_separation>
+      <wheelbase>0.40</wheelbase>
+      <wheel_radius>0.12</wheel_radius>
+      <min_acceleration>-0.5</min_acceleration>
+      <max_acceleration>0.5</max_acceleration>
+      <odom_topic>/br/wheel/odometry</odom_topic>
+      <tf_topic>/br/wheel/tf</tf_topic>
+      <frame_id>br/odom</frame_id>
+      <child_frame_id>br/base_footprint</child_frame_id>
+      <odom_publish_frequency>50</odom_publish_frequency>
+    </plugin>
+    <plugin filename="ignition-gazebo-joint-position-controller-system" name="ignition::gazebo::systems::JointPositionController">
+      <joint_name>lift_joint</joint_name>
+      <p_gain>1200</p_gain>
+      <topic>/br/joint/lift_joint/cmd_pos</topic>
+      <i_gain>60</i_gain>
+      <d_gain>30</d_gain>
+      <i_max>60</i_max>
+      <i_min>-60</i_min>
+      <cmd_max>120</cmd_max>
+      <cmd_min>-120</cmd_min>
+      <initial_position>0</initial_position>
+    </plugin>
+    <plugin filename="ignition-gazebo-joint-position-controller-system" name="ignition::gazebo::systems::JointPositionController">
+      <joint_name>reach_joint</joint_name>
+      <p_gain>500</p_gain>
+      <topic>/br/joint/reach_joint/cmd_pos</topic>
+      <i_gain>0</i_gain>
+      <d_gain>5</d_gain>
+      <i_max>60</i_max>
+      <i_min>-60</i_min>
+      <cmd_max>80</cmd_max>
+      <cmd_min>-80</cmd_min>
+      <initial_position>0</initial_position>
+    </plugin>
+    <plugin filename="ignition-gazebo-joint-position-controller-system" name="ignition::gazebo::systems::JointPositionController">
+      <joint_name>jaw_left_joint</joint_name>
+      <p_gain>500</p_gain>
+      <topic>/br/joint/jaw_left_joint/cmd_pos</topic>
+      <i_gain>0</i_gain>
+      <d_gain>8</d_gain>
+      <i_max>60</i_max>
+      <i_min>-60</i_min>
+      <cmd_max>20</cmd_max>
+      <cmd_min>-20</cmd_min>
+      <initial_position>0</initial_position>
+    </plugin>
+    <plugin filename="ignition-gazebo-joint-position-controller-system" name="ignition::gazebo::systems::JointPositionController">
+      <joint_name>jaw_right_joint</joint_name>
+      <p_gain>500</p_gain>
+      <topic>/br/joint/jaw_right_joint/cmd_pos</topic>
+      <i_gain>0</i_gain>
+      <d_gain>8</d_gain>
+      <i_max>60</i_max>
+      <i_min>-60</i_min>
+      <cmd_max>20</cmd_max>
+      <cmd_min>-20</cmd_min>
+      <initial_position>0</initial_position>
+    </plugin>
+    <plugin filename="ignition-gazebo-joint-position-controller-system" name="ignition::gazebo::systems::JointPositionController">
+      <joint_name>cap_flip_joint</joint_name>
+      <p_gain>80</p_gain>
+      <topic>/br/joint/cap_flip_joint/cmd_pos</topic>
+      <i_gain>0</i_gain>
+      <d_gain>5</d_gain>
+      <i_max>60</i_max>
+      <i_min>-60</i_min>
+      <cmd_max>25</cmd_max>
+      <cmd_min>-25</cmd_min>
+      <initial_position>0</initial_position>
+    </plugin>
+    <plugin filename="ignition-gazebo-joint-state-publisher-system" name="ignition::gazebo::systems::JointStatePublisher">
+      <topic>/br/sim/joint_states</topic>
+    </plugin>
+    <plugin filename="ignition-gazebo-odometry-publisher-system" name="ignition::gazebo::systems::OdometryPublisher">
+      <odom_frame>world</odom_frame>
+      <robot_base_frame>br/base_footprint</robot_base_frame>
+      <dimensions>3</dimensions>
+      <odom_publish_frequency>50</odom_publish_frequency>
+      <odom_topic>/br/ground_truth/odometry</odom_topic>
+      <odom_covariance_topic>/br/ground_truth/odometry_covariance</odom_covariance_topic>
+      <tf_topic>/br/ground_truth/pose</tf_topic>
+      <gaussian_noise>0</gaussian_noise>
+      <xyz_offset>0 0 0</xyz_offset>
+      <rpy_offset>0 0 0</rpy_offset>
+    </plugin>
+  </gazebo>
+  <joint name="cap_wrist_mount_joint" type="fixed">
+    <parent link="gripper_base" />
+    <child link="cap_cradle" />
+    <origin xyz="0 0 0" />
+  </joint>
+  <link name="lidar_pedestal">
+    <inertial>
+      <origin xyz="0 0 0" />
+      <mass value="0.15" />
+      <inertia ixx="0.001103125" iyy="0.001103125" izz="3.0625000000000006e-05" ixy="0" ixz="0" iyz="0" />
+    </inertial>
+    <visual>
+      <geometry>
+        <box size=".035 .035 .295" />
+      </geometry>
+      <material name="pedestal_grey">
+        <color rgba=".22 .24 .26 1" />
+      </material>
+    </visual>
+    <collision>
+      <geometry>
+        <box size=".035 .035 .295" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="lidar_pedestal_mount_joint" type="fixed">
+    <parent link="base_link" />
+    <child link="lidar_pedestal" />
+    <origin xyz="-0.18 0 0.2075" />
+  </joint>
+</robot>

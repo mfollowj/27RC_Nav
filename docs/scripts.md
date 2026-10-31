@@ -1,6 +1,20 @@
 # 一键启动脚本目录
 
-从仓库根目录运行。手工使用 `ros2` 前执行 `source env.sh`，启动脚本会自行加载环境。首次配置与完整步骤见 [上手与部署](getting_started.md)。
+从仓库根目录运行。Fortress 场景入口直接使用已有仿真环境；手工使用 ROS 导航命令前执行 `source env.sh`。首次配置与完整步骤见 [上手与部署](getting_started.md)。
+
+## V3 双机器人：Fortress
+
+| 命令 | 作用 | 前提 |
+| --- | --- | --- |
+| `./sim_robots.sh` | V3 场地、53 道具与 BR／TR 原型 | 已有 Fortress 6.18，无需 ROS 源码构建 |
+| `./sim_robots.sh --docker rc27_nav` | 使用现有容器启动双车场景 | 将运行资源复制到私有临时目录，退出后清理 |
+| `./sim_robots.sh -s --iterations 10` | 无 GUI 运行有限物理步 | 同上 |
+| `./sim_robots.sh --docker rc27_nav -s --iterations 10` | 容器内无 GUI 短测 | 不改变原容器挂载 |
+| `./sim_robots.sh --docker rc27_nav -s --iterations 1000` | 本轮实际执行的 1000 步入口 | 56 模型加载、退出码 0，见 [验证记录](status.md) |
+| `IGN_PARTITION=scu27rc_v3_tr_br_demo ./sim_robots.sh` | 在指定独立分区运行双车场景 | 与其他仿真使用不同分区 |
+| `./simulation/worlds/cn_v3_draft/start_fortress_field.sh` | 保留的仅场地／道具入口 | 54 个模型，不含机器人 |
+
+`sim_robots.sh` 转调场地目录下的 `start_fortress_robots.sh`，使用 `robocon_cn_v3_draft_tr_br.world`。保留 `/br_v2`、`/tr_v2` 原生控制话题，默认不启 GPU Sensors，不启动 ROS、LIO、Nav2。控制与生成源见 [机器人模型](../simulation/robots/README.md)，容器运行方式和初态见 [地图说明](maps.md)。Ctrl-C 停止本次场景，Docker 模式清理自己的进程组与临时资源。
 
 ## 构建与环境
 
@@ -15,7 +29,7 @@
 
 系统 ROS／Nav2、系统库和 Livox-SDK2 需预先安装；Classic 整车仿真另需相应 Gazebo 与控制插件，见 [依赖说明](../third_party/README.md)。换机器、架构或源码路径后重新构建。
 
-## 仿真
+## omni4 导航仿真：Classic
 
 | 命令 | 作用 | 常用参数／前提 |
 | --- | --- | --- |

@@ -13,7 +13,7 @@
 #      2 数据流频率（雷达 / IMU 的 Hz）
 #      3 消息内容（点数、z 范围、NaN 比例；IMU 的加速度模长、零偏）
 #      4 时间戳是否在前进（防"只有一个缓存的旧消息"）
-#      5 下游是否真的用上了（/cloud_registered、/Odometry、TF odom->base_link）
+#      5 下游是否真的用上了（/cloud_registered、/aft_mapped_to_init、TF odom->base_link）
 # ============================================================================
 set +u
 cd "$(dirname "$0")"
@@ -41,7 +41,12 @@ echo "=================================================================="
 
 # ---------- 0 环境 ----------
 echo "[0/5] 环境"
-if [ -f ./env.sh ]; then . ./env.sh >/dev/null 2>&1 && info "已 source ./env.sh"; else info "没找到 env.sh（真机可能不需要）"; fi
+if [ -f ./env.sh ]; then
+    . ./env.sh || exit
+    info "已 source ./env.sh"
+else
+    info "没找到 env.sh（真机可能不需要）"
+fi
 info "ROS_DOMAIN_ID=${ROS_DOMAIN_ID:-<未设>}  GAZEBO_MASTER_URI=${GAZEBO_MASTER_URI:-<未设>}"
 if ! command -v ros2 >/dev/null 2>&1; then fail "找不到 ros2（先 source /opt/ros/humble/setup.bash）"; echo; echo "总判定：FAIL"; exit 1; fi
 NODES=$(timeout 8 ros2 node list 2>/dev/null | wc -l)
@@ -211,7 +216,7 @@ done < <(echo "${CKOUT}" | grep '^RES ')
 
 # ---------- 4 下游：LIO 有没有真的用上 ----------
 echo "[4/5] 下游（LIO 是否真的用上了这份数据）"
-for t in /cloud_registered /Odometry; do
+for t in /cloud_registered /aft_mapped_to_init; do
     h=$(timeout 8 ros2 topic hz "$t" 2>/dev/null | grep -oP 'average rate: \K[\d.]+' | head -1)
     if [ -n "${h}" ]; then pass "${t}: ${h} Hz"; else fail "${t} 没有数据（LIO 没起来/没收到雷达）"; fi
 done

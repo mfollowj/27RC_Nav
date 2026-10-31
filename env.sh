@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # ============================================================================
 #  SCU27RC_Nav 统一环境（所有一键脚本都会 source 它，手敲 ros2 命令前也建议 source）
-#      source /home/zx/ITEM/SCU27RC_Nav/env.sh
+#      source /path/to/SCU27RC_Nav/env.sh
 # ============================================================================
 #  ★ 私有 DDS 域 / Gazebo 端口
 #    ROS 2 默认 ROS_DOMAIN_ID=0 是"全网共用"的，同机还有别的 ROS 2 仿真在发
@@ -17,9 +17,23 @@ export GAZEBO_MASTER_URI="${RC_GAZEBO_MASTER_URI:-http://127.0.0.1:11355}"
 
 # ---------------------------------------------------------------------------
 _root="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+_rc_previous_root="${RC_ROOT:-}"
+# 换布局或切换仓库后，迁移继承的默认目录；用户指定的其他安装目录继续保留。
+for _rc_default_root in "${_rc_previous_root}" "${_root}"; do
+    [ -n "${_rc_default_root}" ] || continue
+    case "${RC_DEPS_INSTALL:-}" in
+        "${_rc_default_root}/Deps/install"|"${_rc_default_root}/third_party/install")
+            unset RC_DEPS_INSTALL ;;
+    esac
+    case "${RC_WS_INSTALL:-}" in
+        "${_rc_default_root}/Nav/ros2_ws/install"|"${_rc_default_root}/install")
+            unset RC_WS_INSTALL ;;
+    esac
+done
+unset _rc_default_root
 export RC_ROOT="${_root}"
-RC_DEPS_INSTALL="${RC_DEPS_INSTALL:-${_root}/Deps/install}"
-RC_WS_INSTALL="${_root}/Nav/ros2_ws/install"
+export RC_DEPS_INSTALL="${RC_DEPS_INSTALL:-${_root}/third_party/install}"
+export RC_WS_INSTALL="${RC_WS_INSTALL:-${_root}/install}"
 
 # ---------------------------------------------------------------------------
 #  0) 清洗继承来的环境：终端里可能还留着别的工作区（例如旧 SCURC_Nav_Sim、
@@ -36,6 +50,9 @@ _rc_stale_prefixes() {
         "${RC_DEPS_INSTALL}" \
         "${RC_WS_INSTALL}" \
         "${_root}"
+    if [ -n "${_rc_previous_root}" ]; then
+        printf '%s\n' "${_rc_previous_root}"
+    fi
 }
 
 _rc_drop_prefixes() {   # $1=环境变量名（冒号分隔），其余=要摘掉的前缀
@@ -53,7 +70,11 @@ _rc_drop_prefixes() {   # $1=环境变量名（冒号分隔），其余=要摘�
         done
         [ "${bad}" = "1" ] || out="${out:+${out}:}${entry}"
     done
-    export "${var}=${out}"
+    if [ -n "${out}" ]; then
+        export "${var}=${out}"
+    else
+        unset "${var}"
+    fi
 }
 
 mapfile -t _rc_stale < <(_rc_stale_prefixes)
@@ -63,18 +84,30 @@ for _v in AMENT_PREFIX_PATH CMAKE_PREFIX_PATH COLCON_PREFIX_PATH ROS_PACKAGE_PAT
 done
 unset _v
 
-source /opt/ros/humble/setup.bash
-[ -f /usr/share/gazebo-11/setup.sh ] && source /usr/share/gazebo-11/setup.sh >/dev/null 2>&1
+if [ ! -f /opt/ros/humble/setup.bash ]; then
+    echo '[env] 未安装 ROS 2 Humble：需要 /opt/ros/humble/setup.bash。' >&2
+    return 1
+fi
+source /opt/ros/humble/setup.bash || return
+if [ -f /usr/share/gazebo-11/setup.sh ]; then
+    source /usr/share/gazebo-11/setup.sh >/dev/null 2>&1 || return
+fi
 
-# 1) 本项目自带的非官方依赖（Deps/，见 Deps/README.md 与 Deps/build_deps.sh）
+# 1) 本项目自带的非官方依赖（third_party/，见 third_party/build_deps.sh）
 #    ★ 现在是**唯一**来源：fast_livo / fast_lio / livox_ros_driver2 / vikit_* /
 #      small_gicp / TEASER++ 全部装在这里，不再依赖任何外部工作区。
-if [ -f "${RC_DEPS_INSTALL}/setup.bash" ]; then
-    source "${RC_DEPS_INSTALL}/setup.bash" >/dev/null 2>&1
+if [ -f "${RC_DEPS_INSTALL}/local_setup.bash" ]; then
+    # local_setup 不会重新引入编译机写入 setup.bash 的旧工作区绝对路径。
+    source "${RC_DEPS_INSTALL}/local_setup.bash" || return
 else
     echo "[env] 警告：${RC_DEPS_INSTALL}/setup.bash 不存在。" >&2
-    echo "[env]       先编译依赖：./Deps/build_deps.sh" >&2
+    echo "[env]       先编译依赖：./third_party/build_deps.sh" >&2
 fi
+
+case ":${CMAKE_PREFIX_PATH:-}:" in
+    *":${RC_DEPS_INSTALL}:"*) ;;
+    *) export CMAKE_PREFIX_PATH="${RC_DEPS_INSTALL}${CMAKE_PREFIX_PATH:+:${CMAKE_PREFIX_PATH}}" ;;
+esac
 
 # 1.1) TEASER++ / small_gicp 是普通 CMake 安装（不是 ament 包），ld 不会自动找到。
 #      这里统一补 LD_LIBRARY_PATH，真机/仿真两条链路就不用各自再拼一把。
@@ -86,13 +119,17 @@ if [ -d "${RC_DEPS_INSTALL}/lib" ]; then
 fi
 
 # 2) 本项目 ROS 工作区（rc_field_nav + relocalization + 仿真雷达插件）
-[ -f "${RC_WS_INSTALL}/setup.bash" ] && source "${RC_WS_INSTALL}/setup.bash" >/dev/null 2>&1
+if [ -f "${RC_WS_INSTALL}/local_setup.bash" ]; then
+    source "${RC_WS_INSTALL}/local_setup.bash" || return
+fi
 
 # 无 X 显示（SSH/远程）默认不开 RViz：rviz2 在无显示时会因 XCB 直接崩
 if [ -z "${RC_RVIZ:-}" ]; then
     if [ -n "${DISPLAY:-}" ]; then export RC_RVIZ=true; else export RC_RVIZ=false; fi
 fi
 # 只有本机确实有 X0 时才兜底 DISPLAY，避免在远程把 DISPLAY 设成 :0 导致 rviz 必崩
-[ -S /tmp/.X11-unix/X0 ] && export DISPLAY="${DISPLAY:-:0}"
-unset _root RC_DEPS_INSTALL RC_WS_INSTALL
+if [ -S /tmp/.X11-unix/X0 ]; then
+    export DISPLAY="${DISPLAY:-:0}"
+fi
+unset _root _rc_stale _rc_previous_root
 unset -f _rc_stale_prefixes _rc_drop_prefixes

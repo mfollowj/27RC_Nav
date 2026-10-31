@@ -12,13 +12,10 @@
 # ============================================================================
 set +u
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-export ROS_DOMAIN_ID="${DOMAIN:-42}"
-if [ -f "${ROOT}/env.sh" ]; then
-    source "${ROOT}/env.sh"
-    export ROS_DOMAIN_ID="${DOMAIN:-42}"
-fi
+export RC_DOMAIN_ID="${DOMAIN:-${RC_DOMAIN_ID:-42}}"
+source "${ROOT}/env.sh" || exit
 
-CFG="${ROOT}/Nav/real/rviz/robot_odom.rviz"
+CFG="${ROOT}/robot/rviz/robot_odom.rviz"
 [ -f "${CFG}" ] || { echo "找不到 ${CFG}"; exit 1; }
 
 echo "[rviz] ROS_DOMAIN_ID=${ROS_DOMAIN_ID}  Fixed Frame=odom  config=${CFG}"

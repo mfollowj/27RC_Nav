@@ -11,10 +11,11 @@
 set +u
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # 私有 DDS 域(42) + 私有 Gazebo 端口(11355) + 全部环境依赖，说明见 env.sh
-source "${ROOT}/env.sh"
+source "${ROOT}/env.sh" || exit
 echo "[环境] ROS_DOMAIN_ID=${ROS_DOMAIN_ID}  GAZEBO_MASTER_URI=${GAZEBO_MASTER_URI}"
 
-MAPS="${ROOT}/Nav/ros2_ws/install/rc_field_nav/share/rc_field_nav/maps"
+MAPS="$(ros2 pkg prefix rc_field_nav)" || exit
+MAPS="${MAPS}/share/rc_field_nav/maps"
 
 # ---------------------------------------------------------------------------
 # 解析用户显式给的地图参数（形如 name:=value；路径里的引号 bash 已经去掉）
@@ -55,7 +56,7 @@ if [ "$bad" = "1" ]; then
     echo "【或照抄】把 <名字> 换成上面列出的名字："
     echo "    ./sim_nav.sh prior_map:=${MAPS}/<名字>_map.pcd map:=${MAPS}/<名字>_costmap.yaml"
     case "${prior_arg}${map_arg}" in
-        */Nav/ros2_ws/*|*/Nav/real/*|*/Nav/sim/*)
+        */src/*|*/robot/*|*/simulation/*)
             echo
             echo "提示：你给的路径少写了项目前缀 —— 本机完整路径必须以 ${ROOT} 开头。"
             ;;
@@ -97,10 +98,14 @@ else
     if [ -s "${MAPS}/prior_map.pcd" ] && [ -s "${MAPS}/prior_costmap.yaml" ]; then
         EXTRA=()
     else
-        PAIR=""
-        for y in $(ls -t "${MAPS}"/*_costmap.yaml 2>/dev/null); do
+        PAIR=""; LATEST=""
+        for y in "${MAPS}"/*_costmap.yaml; do
+            [ -s "${y}" ] || continue
             n="$(basename "${y}" _costmap.yaml)"
-            if [ -s "${MAPS}/${n}_map.pcd" ]; then PAIR="${n}"; break; fi
+            if [ -s "${MAPS}/${n}_map.pcd" ] && \
+               { [ -z "${LATEST}" ] || [ "${y}" -nt "${LATEST}" ]; }; then
+                PAIR="${n}"; LATEST="${y}"
+            fi
         done
         if [ -n "${PAIR}" ]; then
             echo "[提示] 没有默认的 prior_map.pcd，自动使用最近一次存图：${PAIR}_map.pcd + ${PAIR}_costmap.yaml"
@@ -126,4 +131,4 @@ fi
 echo "[1/2] 清理上一次残留的仿真进程"
 ros2 run rc_field_nav kill_sim.sh >/dev/null 2>&1 || true
 echo "[2/2] 启动先验图导航（重定位 + Nav2）"
-exec ros2 launch rc_field_nav nav_prior_map.launch.py gui:="${RC_GUI:-true}" rviz:="${RC_RVIZ:-true}" "${EXTRA[@]}" "$@"
+exec ros2 launch rc_field_nav sim_navigation.launch.py gui:="${RC_GUI:-true}" rviz:="${RC_RVIZ:-true}" "${EXTRA[@]}" "$@"

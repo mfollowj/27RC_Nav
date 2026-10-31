@@ -10,9 +10,9 @@
 set +u
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # 私有 DDS 域(42) + 私有 Gazebo 端口(11355) + 全部环境依赖，说明见 env.sh
-source "${ROOT}/env.sh"
+source "${ROOT}/env.sh" || exit
 echo "[环境] ROS_DOMAIN_ID=${ROS_DOMAIN_ID}  GAZEBO_MASTER_URI=${GAZEBO_MASTER_URI}"
-ROOT_REAL="${ROOT}/Nav/real"
+ROOT_REAL="${ROOT}/robot"
 
 # 真机上的"只能有一套"自检：两个驱动同时连一台雷达会把时间戳搞乱
 # （实测：LiDAR 时间戳倒退、LIO 丢弃全部 IMU、位姿乱跳）
@@ -26,7 +26,15 @@ for _a in "$@"; do
     if [ "${_a}" = "--force" ]; then _rc_force=1; else _rc_args+=("${_a}"); fi
 done
 set -- "${_rc_args[@]}"
-PIDS=$(pgrep -f 'livox_ros_driver2_nod[e]|fastlivo_mappin[g]|fastlio_mappin[g]' 2>/dev/null)
+START_DRIVER="${RC_DRIVER:-true}"
+for _a in "$@"; do
+    case "${_a}" in livox_driver:=*) START_DRIVER="${_a#livox_driver:=}" ;; esac
+done
+PATTERN='fastlivo_mappin[g]|fastlio_mappin[g]'
+if [ "${START_DRIVER}" != false ] && [ "${START_DRIVER}" != 0 ]; then
+    PATTERN="livox_ros_driver2_nod[e]|${PATTERN}"
+fi
+PIDS=$(pgrep -f "${PATTERN}" 2>/dev/null)
 if [ -n "${PIDS}" ]; then
   echo "[注意] 本机已有雷达驱动/LIO 进程在跑（按进程名判，与 ROS 域无关）："
   pgrep -af 'livox_ros_driver2_node|fastlivo_mapping|fastlio_mapping|livox_preprocess' | sed 's/^/    /'

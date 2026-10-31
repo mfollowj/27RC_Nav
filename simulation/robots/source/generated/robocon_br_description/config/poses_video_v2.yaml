@@ -1,0 +1,106 @@
+prototype: true
+poses:
+  stowed:
+    lift_stage1_joint: 0
+    lift_stage2_joint: 0
+    lift_stage3_joint: 0
+    reach_joint: 0
+    jaw_left_joint: 0
+    pad_left_rotate_joint: 0
+    jaw_right_joint: 0
+    pad_right_rotate_joint: 0
+    cargo_slide_joint: 0
+    cargo_fold_joint: 0
+    tail_slide_joint: 0
+    tail_pitch_joint: 0
+  open:
+    lift_stage1_joint: 0
+    lift_stage2_joint: 0
+    lift_stage3_joint: 0
+    reach_joint: 0
+    jaw_left_joint: 0.17
+    pad_left_rotate_joint: 0
+    jaw_right_joint: 0.17
+    pad_right_rotate_joint: 0
+    cargo_slide_joint: 0
+    cargo_fold_joint: 0
+    tail_slide_joint: 0
+    tail_pitch_joint: 0
+  holding350:
+    lift_stage1_joint: 0
+    lift_stage2_joint: 0
+    lift_stage3_joint: 0
+    reach_joint: 0.25
+    jaw_left_joint: 0.13
+    pad_left_rotate_joint: 0
+    jaw_right_joint: 0.13
+    pad_right_rotate_joint: 0
+    cargo_slide_joint: 0
+    cargo_fold_joint: 0
+    tail_slide_joint: 0
+    tail_pitch_joint: 0
+  raised:
+    lift_stage1_joint: 0.2
+    lift_stage2_joint: 0.2
+    lift_stage3_joint: 0.2
+    reach_joint: 0.25
+    jaw_left_joint: 0.13
+    pad_left_rotate_joint: 0
+    jaw_right_joint: 0.13
+    pad_right_rotate_joint: 0
+    cargo_slide_joint: 0
+    cargo_fold_joint: 0
+    tail_slide_joint: 0
+    tail_pitch_joint: 0
+  flip_cap:
+    lift_stage1_joint: 0.08
+    lift_stage2_joint: 0.08
+    lift_stage3_joint: 0.08
+    reach_joint: 0.25
+    jaw_left_joint: 0.055
+    pad_left_rotate_joint: 1.5707963267948966
+    jaw_right_joint: 0.055
+    pad_right_rotate_joint: 1.5707963267948966
+    cargo_slide_joint: 0
+    cargo_fold_joint: 0
+    tail_slide_joint: 0
+    tail_pitch_joint: 0
+  place:
+    lift_stage1_joint: 0.2
+    lift_stage2_joint: 0.2
+    lift_stage3_joint: 0.2
+    reach_joint: 0.25
+    jaw_left_joint: 0.17
+    pad_left_rotate_joint: 0
+    jaw_right_joint: 0.17
+    pad_right_rotate_joint: 0
+    cargo_slide_joint: 0
+    cargo_fold_joint: 0
+    tail_slide_joint: 0
+    tail_pitch_joint: 0
+  channel_open:
+    lift_stage1_joint: 0.23
+    lift_stage2_joint: 0.23
+    lift_stage3_joint: 0.23
+    reach_joint: 0
+    jaw_left_joint: 0.17
+    pad_left_rotate_joint: 0
+    jaw_right_joint: 0.17
+    pad_right_rotate_joint: 0
+    cargo_slide_joint: 0
+    cargo_fold_joint: -1.5707963267948966
+    tail_slide_joint: 0
+    tail_pitch_joint: 0
+  tail_support:
+    lift_stage1_joint: 0
+    lift_stage2_joint: 0
+    lift_stage3_joint: 0
+    reach_joint: 0
+    jaw_left_joint: 0
+    pad_left_rotate_joint: 0
+    jaw_right_joint: 0
+    pad_right_rotate_joint: 0
+    cargo_slide_joint: 0
+    cargo_fold_joint: 0
+    tail_slide_joint: 0.1
+    tail_pitch_joint: -1.897

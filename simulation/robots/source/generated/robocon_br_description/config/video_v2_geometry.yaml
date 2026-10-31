@@ -1,0 +1,59 @@
+prototype: true
+reference: User video actual frames; geometry design values, not video-derived dimensions.
+robot: robocon_br_video_v2
+namespace: br_v2
+lift:
+  stage_count: 3
+  stage_rail_length_m: 0.32
+  stroke_each_m: 0.23
+  minimum_overlap_m: 0.09
+  total_stroke_m: 0.69
+  tcp_home_from_footprint_m:
+  - 0.27
+  - 0
+  - 0.17
+reach:
+  stroke_m: 0.3
+  inner_tube_length_m: 0.38
+  minimum_overlap_m: 0.08
+gripper:
+  inner_gap_m:
+  - 0.075
+  - 0.415
+  rotating_pad_box_m:
+  - 0.12
+  - 0.025
+  - 0.12
+  rotation_axes: Both world-aligned local Y, not mirrored signs
+  rotation_limit_rad:
+  - -3.141592653589793
+  - 3.141592653589793
+cargo:
+  one_tray_center_from_footprint_at_home_m:
+  - -0.02
+  - 0
+  - 0.35
+  slide_stroke_m: 0.29
+  fold_empty_to_open_channel_rad: -1.5707963267948966
+  second_payload_status: Tray transfer reach is designed; storage+gripper two-object
+    physical transfer not validated.
+lidar_imu:
+  from_base_link_m:
+  - -0.27
+  - 0
+  - 0.439
+  from_footprint_m:
+  - -0.27
+  - 0
+  - 0.659
+  rotation_rpy:
+  - 0
+  - 0
+  - 0
+  co_location: simulation assumption, not measured MID-360 IMU calibration
+tail:
+  slide_stroke_m: 0.2
+  stowed_pitch_joint_rad: 0
+  nominal_ground_support_pitch_rad: -1.897
+  status: Real prismatic/revolute/passive-wheel model; stair or anti-tip efficacy
+    unverified.

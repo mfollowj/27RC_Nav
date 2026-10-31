@@ -12,6 +12,10 @@ install(DIRECTORY ../../simulation/worlds/cn_v3_draft
         DESTINATION share/${PROJECT_NAME}/worlds
         USE_SOURCE_PERMISSIONS)
 
+install(DIRECTORY ../../simulation/robots
+        DESTINATION share/${PROJECT_NAME}
+        USE_SOURCE_PERMISSIONS)
+
 # 建图产出的地图目录（先建空目录，保证 install 后路径存在）
 install(DIRECTORY maps
         DESTINATION share/${PROJECT_NAME}

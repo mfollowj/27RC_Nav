@@ -1,0 +1,157 @@
+prototype: true
+video_confirmed: general mast/load-tray arrangement and two rotating finger pads;
+  dimensions and ordinary-wheel differential drive are design hypotheses
+model_name: robocon_tr_video_v2
+namespace: tr_v2
+joint_order:
+- mast_extension_joint
+- lift_joint
+- reach_joint
+- jaw_left_joint
+- jaw_right_joint
+- pad_left_spin_joint
+- pad_right_spin_joint
+poses:
+  stowed:
+    mast_extension_joint: 0
+    lift_joint: 0
+    reach_joint: 0
+    jaw_left_joint: 0
+    jaw_right_joint: 0
+    pad_left_spin_joint: 0
+    pad_right_spin_joint: 0
+  extend_clear:
+    mast_extension_joint: 0
+    lift_joint: 0
+    reach_joint: 0.42
+    jaw_left_joint: 0.16
+    jaw_right_joint: 0.16
+    pad_left_spin_joint: 0
+    pad_right_spin_joint: 0
+  open:
+    mast_extension_joint: 0
+    lift_joint: -0.17
+    reach_joint: 0.42
+    jaw_left_joint: 0.16
+    jaw_right_joint: 0.16
+    pad_left_spin_joint: 0
+    pad_right_spin_joint: 0
+  open200:
+    mast_extension_joint: -0.08
+    lift_joint: -0.17
+    reach_joint: 0.42
+    jaw_left_joint: 0.16
+    jaw_right_joint: 0.16
+    pad_left_spin_joint: 0
+    pad_right_spin_joint: 0
+  grip350:
+    mast_extension_joint: 0
+    lift_joint: -0.17
+    reach_joint: 0.42
+    jaw_left_joint: 0.121
+    jaw_right_joint: 0.121
+    pad_left_spin_joint: 0
+    pad_right_spin_joint: 0
+  grip200:
+    mast_extension_joint: -0.08
+    lift_joint: -0.17
+    reach_joint: 0.42
+    jaw_left_joint: 0.046
+    jaw_right_joint: 0.046
+    pad_left_spin_joint: 0
+    pad_right_spin_joint: 0
+  clear_fences:
+    mast_extension_joint: 0
+    lift_joint: 0.18
+    reach_joint: 0.42
+    jaw_left_joint: 0.121
+    jaw_right_joint: 0.121
+    pad_left_spin_joint: 0
+    pad_right_spin_joint: 0
+  over_deck:
+    mast_extension_joint: 0
+    lift_joint: 0.18
+    reach_joint: 0
+    jaw_left_joint: 0.121
+    jaw_right_joint: 0.121
+    pad_left_spin_joint: 0
+    pad_right_spin_joint: 0
+  holding350:
+    mast_extension_joint: 0
+    lift_joint: 0.0675
+    reach_joint: 0
+    jaw_left_joint: 0.121
+    jaw_right_joint: 0.121
+    pad_left_spin_joint: 0
+    pad_right_spin_joint: 0
+  holding200:
+    mast_extension_joint: 0
+    lift_joint: -0.0075
+    reach_joint: 0.12
+    jaw_left_joint: 0.046
+    jaw_right_joint: 0.046
+    pad_left_spin_joint: 0
+    pad_right_spin_joint: 0
+  raised:
+    mast_extension_joint: 0.18
+    lift_joint: 0.08
+    reach_joint: 0.1
+    jaw_left_joint: 0.121
+    jaw_right_joint: 0.121
+    pad_left_spin_joint: 0
+    pad_right_spin_joint: 0
+  place:
+    mast_extension_joint: 0.18
+    lift_joint: 0
+    reach_joint: 0.36
+    jaw_left_joint: 0.16
+    jaw_right_joint: 0.16
+    pad_left_spin_joint: 0
+    pad_right_spin_joint: 0
+  flip_cap_ready:
+    mast_extension_joint: 0.1
+    lift_joint: 0.1
+    reach_joint: 0.42
+    jaw_left_joint: 0.046
+    jaw_right_joint: 0.046
+    pad_left_spin_joint: 0
+    pad_right_spin_joint: 0
+  flip_cap_90:
+    mast_extension_joint: 0.1
+    lift_joint: 0.1
+    reach_joint: 0.42
+    jaw_left_joint: 0.046
+    jaw_right_joint: 0.046
+    pad_left_spin_joint: 1.5707963267948966
+    pad_right_spin_joint: 1.5707963267948966
+geometry:
+  chassis_m:
+  - 0.6
+  - 0.54
+  - 0.11
+  nominal_stowed_envelope_estimate_m:
+  - 0.693
+  - 0.632
+  - 0.695
+  jaw_inner_gap_formula_m: .100 + q_left + q_right
+  max_open_gap_m: 0.42
+  tool_center_footprint_xyz_m:
+  - .10 + reach
+  - '0'
+  - .35 + mast_extension + lift
+  load_deck_top_height_footprint_m: 0.2425
+  lidar_imu_footprint_xyz_m:
+  - -0.25
+  - 0
+  - 0.665
+  T_IL: identity, simulated co-origin
+  sensor_model: 360x32 simultaneous GPU raster, not true nonrepetitive MID-360
+unverified:
+- grasp/rotate/release with physical blocks
+- full joint sweeps and sensor occlusion
+- 3-object magazine
+- stairs and climbing auxiliaries
+- payload and friction calibration
+physical_logic: grip ahead of chassis, lift above deck/fences, retract onto load deck;
+  both pads rotate together only for a single 200mm cap, while jaw closure remains
+  lateral

@@ -9,6 +9,7 @@
 | 构建与环境 | 根 `build.sh` 统一构建；`env.sh` 加载 Humble、`third_party/install`、`install` | 目标系统仍需 ROS／Gazebo／Nav2、系统库与 Livox-SDK2；换机重新构建 |
 | 仿真导航 | FAST-LIVO2、TEASER++／VGICP、bridge、Nav2，保留旧定位实现 | 下方保存 2026-10-30 原场地闭环记录；本轮改动的运行结果另行记录 |
 | 国内 V3 场地 | 显式 `field:=cn_v3_draft`；默认保留 legacy 场地 | Docker Fortress 已实际加载 54 个模型并执行 10 步；Classic 资源安装与 launch 选择通过，整车链待测，详见 [地图文档](maps.md) |
+| V3 BR／TR 双车场景 | 根 `sim_robots.sh` → Fortress 双车 world，保留 BR 麦轮滚子、TR 普通轮和机构 | Docker 原生 SceneInfo 实际返回 56 模型含 BR／TR；无 GPU Sensors 的 1000 物理步退出码 0，不启动 ROS／LIO／Nav2 |
 | 真机导航 | `real_map.sh` 建图，`real_reloc.sh` 仅定位，`real_nav.sh` 带 Nav2 | 目标机重做／确认全场先验图，再验证定位与底盘执行 |
 | 小机器人位置串口 | 根 `start_robot.sh` → `robot/start_robot.sh`；本仓库驱动、LIO、mcu_bridge | 使用原始 IMU 和 `odom→base_link`；先 dry-run，再与电控验证 |
 | 决策层 | `decision/` 现有 5 份 Markdown 设计 | 比赛节点、任务 launch 与机构执行接口待实现 |
@@ -22,6 +23,7 @@
 - **速度反馈仍待补充／验证。** 当前 `third_party/fast_livo/src/LIVMapper.cpp` 的 `publish_odometry` 填充 pose，twist 仍为默认零；Nav2 的速度反馈需要真实 twist 支持，并完成仿真与真机闭环验证。话题路径修正只解决数据源名称。
 - Nav2 输出速度和 MCU 位置闭环是两条执行方式。默认 `real_nav.sh` 没有启动真机串口速度消费者，按电控接口接入后再进行实车导航。
 - 切到 V3 场地要重建同一坐标系下的 PCD 与二维图；当前保留的旧先验图不自动升级。
+- BR／TR 双车入口使用队内视频启发重建的 `video_v2` 原型；原 Classic 导航入口仍生成 omni4。双车控制和生成方法见 [模型说明](../simulation/robots/README.md)。
 
 ### 本轮实际验证（2026-10-31，含目录迁移前记录）
 
@@ -36,11 +38,15 @@
 | 串口参数优先级 | 实际启动 dry-run 节点，验证自定义 YAML 的串口、波特率和坐标系生效，显式 launch 参数可单独覆盖；未打开串口 |
 | 位置帧与脚本 | 现有 `test_frame.py` 通过；修改的 shell/Python 语法、环境重复加载、入口参数和文档本地链接检查通过 |
 | Docker V3 场地 | `rc27_nav` 的 Fortress 6.18.0 在独立 partition 加载场地及 53 道具，10 步后模型数仍为 54；独立场地脚本退出码 0 |
+| Docker V3 BR／TR 双车 | `./sim_robots.sh --docker rc27_nav -s --iterations 1000 -v 3` 实际退出码 0，墙时 12.174 s；原生 SceneInfo 返回 56 模型，含两车，DiffDrive／MecanumDrive 与真值插件均加载；另观察两车原生 odom 初态，Ctrl-C 后本次 server 与临时目录均清理 |
+| BR／TR 资源安装 | `rc_field_nav` 新临时前缀 CMake 构建安装通过；两车 SDF、DAE、生成源、双车 world 及可执行启动入口随包安装 |
 | 目录迁移后的仿真资源 | 根 `src/rc_field_nav` 在新临时前缀真实安装通过；资源 URI、场景选择、建图与导航 LaunchDescription 构造通过。沿用同一资产的 Fortress 测试结果，本次未重做 Docker 运行 |
 
 新目录还实际通过真机 launch 和根入口的参数展开、环境重复加载，以及路径含空格的离线存图；存图检查使用临时输入与输出，不覆盖仓库地图。
 
 当前机器没有 Gazebo Classic 11；Fortress 场地短测不覆盖 Classic 整车、雷达、LIO、Nav2 的联动。真机雷达、串口发送与运动验证留待对应硬件上执行。
+
+双车短测默认未启 GPU Sensors。结果覆盖场景加载、短程物理更新与进程清理；两车初态观测仅为短时间窗口，完整运动、机构操作与长时间接触稳定性仍需分别测试。
 
 ## 历史运行与联调记录（2026-10-30～31）
 

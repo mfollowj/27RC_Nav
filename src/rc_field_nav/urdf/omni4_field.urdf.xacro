@@ -19,6 +19,11 @@
   <!-- 雷达后端文件（launch 传绝对路径；本项目只用 Livox Mid-360） -->
   <xacro:arg name="lidar_sensor_xacro" default="lidar_livox_mid360.xacro"/>
   <xacro:arg name="lidar_topic" default="/livox/lidar"/>
+  <xacro:arg name="imu_topic" default="/livox/imu"/>
+  <!-- 多机器人：每辆车的 ROS 命名空间（controller_manager / joint_states 等） -->
+  <xacro:arg name="ns" default=""/>
+  <!-- true = planar_move 运动学底盘（多机器人同场用）；false = 物理 + ros2_control -->
+  <xacro:arg name="kinematic" default="false"/>
   <xacro:arg name="lidar_mount_z" default="0.36"/>
   <xacro:arg name="imu_mount_z" default="0.30"/>
   <!-- Livox 插件每帧消费的 CSV 行数：mid360.csv 一个完整扫描花样是 20000 行
@@ -36,12 +41,15 @@
 
   <xacro:omni4_chassis/>
   <xacro:omni4_wheels/>
-  <xacro:omni4_imu mount_z="$(arg imu_mount_z)"/>
+  <xacro:omni4_imu mount_z="$(arg imu_mount_z)" imu_topic="$(arg imu_topic)" ns="$(arg ns)"/>
   <xacro:omni4_drive publish_odom_tf="$(arg publish_odom_tf)"
                      odom_topic="$(arg odom_topic)"
-                     controllers_yaml="$(arg controllers_yaml)"/>
+                     controllers_yaml="$(arg controllers_yaml)"
+                     ns="$(arg ns)"
+                     kinematic="$(arg kinematic)"/>
 
   <xacro:omni4_lidar parent="base_link"
+                     ns="$(arg ns)"
                      topic="$(arg lidar_topic)"
                      mount_z="$(arg lidar_mount_z)"
                      samples="$(arg lidar_samples)"

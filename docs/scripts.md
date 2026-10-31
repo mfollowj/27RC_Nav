@@ -16,6 +16,28 @@
 
 `sim_robots.sh` 转调场地目录下的 `start_fortress_robots.sh`，使用 `robocon_cn_v3_draft_tr_br.world`。保留 `/br_v2`、`/tr_v2` 原生控制话题，默认不启 GPU Sensors，不启动 ROS、LIO、Nav2。控制与生成源见 [机器人模型](../simulation/robots/README.md)，容器运行方式和初态见 [地图说明](maps.md)。Ctrl-C 停止本次场景，Docker 模式清理自己的进程组与临时资源。
 
+## 双车同场：Classic（同一个 Gazebo）
+
+| 命令 | 作用 | 说明 |
+| --- | --- | --- |
+| `./sim_two.sh` | 一个 Gazebo 里两辆车 + **两个 RViz** | 默认开 Gazebo 界面与两个 RViz 窗口 |
+| `./sim_two.sh gui:=false` | 只开两个 RViz | 无 Gazebo 界面 |
+| `./sim_two.sh field:=cn_v3_draft x1:=-4 y1:=1 x2:=-4 y2:=3` | 换场地与出生点 | 两车位置分开即可 |
+| `./sim_teleop.sh --topic /car1/cmd_vel` | 遥控一号车 | 另开终端 |
+| `./sim_teleop.sh --topic /car2/cmd_vel` | 遥控二号车 | 另开终端 |
+
+两辆车各自一个 ROS 命名空间，互不干扰：
+
+- `car1`：`/car1/cmd_vel`、`/car1/odom`、`/car1/livox/{lidar,imu}`、`/car1/scan`，TF `car1/odom → car1/base_link`
+- `car2`：同上，前缀换成 `car2`
+- 两个 RViz 的 Fixed Frame 分别是 `car1/odom`、`car2/odom`（配置在 `rviz/two_car1.rviz`、`rviz/two_car2.rviz`）
+
+实现约束（踩过的坑）：
+
+- 同一个 gzserver 里两套 `gazebo_ros2_control` 的 `controller_manager` 会互相干扰（服务不可达），所以双车用 `kinematic:=true` 的 `planar_move` 运动学底盘，**轮子只做外观不转**；单车仍是 physics + ros2_control。
+- Gazebo 插件的 `name` 必须唯一（`imu_plugin_car1` 等），否则 `gazebo_ros_node` 报 "Found multiple nodes with same name" 并让 gzserver 段错误。
+- 雷达点云的 frame_id 仍是 `livox_frame`（没给 link 加前缀），所以两个 RViz 里默认只画车体/里程计/激光扫描，不画点云。
+
 ## 构建与环境
 
 | 命令 | 作用 |

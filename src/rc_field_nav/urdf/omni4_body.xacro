@@ -155,7 +155,7 @@
   </xacro:macro>
 
   <!-- ==================== IMU ==================== -->
-  <xacro:macro name="omni4_imu" params="mount_z:=${imu_default_z}">
+  <xacro:macro name="omni4_imu" params="mount_z:=${imu_default_z} imu_topic:='/livox/imu' ns:=''">
     <link name="imu_link">
       <visual>
         <geometry>
@@ -199,9 +199,9 @@
             <z><noise type="gaussian"><mean>0.0</mean><stddev>2e-3</stddev><bias_mean>0.0</bias_mean><bias_stddev>0.0</bias_stddev></noise></z>
           </linear_acceleration>
         </imu>
-        <plugin name="imu_plugin" filename="libgazebo_ros_imu_sensor.so">
+        <plugin name="imu_plugin${'_' + ns if ns else ''}" filename="libgazebo_ros_imu_sensor.so">
           <ros>
-            <remapping>~/out:=/livox/imu</remapping>
+            <remapping>~/out:=${imu_topic}</remapping>
           </ros>
           <frame_name>imu_link</frame_name>
           <initial_orientation_as_reference>false</initial_orientation_as_reference>
@@ -213,9 +213,16 @@
   <!-- ==================== 驱动：physics（唯一） ==================== -->
   <xacro:macro name="omni4_drive" params="publish_odom_tf:=true
                                           odom_topic:=odom
-                                          controllers_yaml:=''">
+                                          controllers_yaml:=''
+                                          ns:=''
+                                          kinematic:=false">
     <!-- 4 个轮关节的速度接口交给 gazebo_ros2_control；
-         车体运动完全由"轮子转速 + 轮地摩擦"涌现，没有插件直接设定车体速度。 -->
+         车体运动完全由"轮子转速 + 轮地摩擦"涌现，没有插件直接设定车体速度。
+         kinematic:=true 时改用 planar_move（运动学底盘）：多机器人同场时每个
+         gazebo_ros2_control 都会在自己的命名空间里建一个 controller_manager，
+         实测同名节点在同一 gzserver 进程里会互相干扰（服务不可达），
+         所以双车场景默认走 kinematic，轮子只做外观、不转。 -->
+    <xacro:unless value="${kinematic}">
     <ros2_control name="Omni4System" type="system">
       <hardware>
         <plugin>gazebo_ros2_control/GazeboSystem</plugin>
@@ -241,14 +248,41 @@
         <state_interface name="position"/>
       </joint>
     </ros2_control>
+    </xacro:unless>
 
     <gazebo>
-      <plugin filename="libgazebo_ros2_control.so" name="gazebo_ros2_control">
+      <xacro:if value="${kinematic}">
+        <plugin name="planar_move${'_' + ns if ns else ''}" filename="libgazebo_ros_planar_move.so">
+          <ros>
+            <xacro:if value="${ns != ''}">
+              <namespace>${ns}</namespace>
+            </xacro:if>
+            <remapping>cmd_vel:=cmd_vel</remapping>
+            <remapping>odom:=odom</remapping>
+          </ros>
+          <update_rate>100</update_rate>
+          <publish_odom>true</publish_odom>
+          <publish_odom_tf>${publish_odom_tf}</publish_odom_tf>
+          <publish_wheel_tf>false</publish_wheel_tf>
+          <odometry_frame>${(ns + '/') if ns != '' else ''}odom</odometry_frame>
+          <robot_base_frame>${(ns + '/') if ns != '' else ''}base_link</robot_base_frame>
+        </plugin>
+      </xacro:if>
+      <xacro:unless value="${kinematic}">
+      <plugin filename="libgazebo_ros2_control.so" name="gazebo_ros2_control${'_' + ns if ns else ''}">
+        <xacro:if value="${ns != ''}">
+          <ros>
+            <namespace>${ns}</namespace>
+          </ros>
+        </xacro:if>
         <parameters>${controllers_yaml}</parameters>
       </plugin>
       <!-- 轮子转速/位置，robot_state_publisher 与 omni_drive 都要用 -->
-      <plugin name="omni4_joint_state" filename="libgazebo_ros_joint_state_publisher.so">
+      <plugin name="omni4_joint_state${'_' + ns if ns else ''}" filename="libgazebo_ros_joint_state_publisher.so">
         <ros>
+          <xacro:if value="${ns != ''}">
+            <namespace>${ns}</namespace>
+          </xacro:if>
           <remapping>~/out:=joint_states</remapping>
         </ros>
         <update_rate>50</update_rate>
@@ -257,6 +291,7 @@
         <joint_name>base_to_wheel3</joint_name>
         <joint_name>base_to_wheel4</joint_name>
       </plugin>
+      </xacro:unless>
     </gazebo>
 
     <!-- 接触参数（physics 下真正起作用）

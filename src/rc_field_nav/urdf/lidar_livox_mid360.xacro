@@ -25,7 +25,7 @@
 <robot xmlns:xacro="http://ros.org/wiki/xacro">
 
   <xacro:macro name="omni4_lidar"
-               params="parent:='base_link' topic:='/livox/lidar' mount_z:=0.50
+               params="parent:='base_link' topic:='/livox/lidar' mount_z:=0.50 ns:=''
                        scan_csv:='' samples:=4000 downsample:=4 range_max:=40.0
                        horizontal_samples:=100 vertical_samples:=360">
 
@@ -70,7 +70,7 @@
              比 10 Hz 高 50%（CPU 更吃紧，必要时调小 lidar_downsample）。 -->
         <update_rate>15</update_rate>
 
-        <plugin name="livox_frame_plugin" filename="libros2_livox.so">
+        <plugin name="livox_frame_plugin${'_' + ns if ns else ''}" filename="libros2_livox.so">
           <ray>
             <scan>
               <horizontal>
